@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-voltage-yellow: #FBC02D;
+  --color-success-green: #10B981;
+  --color-error-red: #EF4444;
+  
+  --color-app-bg: var(--bg-base);
+  --color-app-card: var(--bg-panel);
+  --color-app-cardBorder: var(--border-main);
+  --color-app-cardHover: var(--bg-panel-hover);
+  --color-app-textMain: var(--text-main);
+  --color-app-textMuted: var(--text-muted);
+  --color-app-textDark: var(--text-dark);
+  
+  --color-app-yellow: #FACC15;
+  --color-app-yellowDark: #eab308;
+  --color-app-accent-bg: var(--bg-accent);
+  --color-app-accent-hover: var(--bg-accent-hover);
+
+  --shadow-glow-yellow: 0 0 20px -5px rgba(251, 191, 36, 0.4);
+  --background-image-radial-glow: var(--bg-radial-glow);
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  /* DARK THEME (Current Default) */
+  --bg-base: #0b101a;
+  --bg-panel: #131927;
+  --bg-panel-hover: #1e293b;
+  --bg-accent: #111827;
+  --bg-accent-hover: #1e293b;
+  --border-main: #1e293b;
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  --text-dark: #64748b;
+  --bg-radial-glow: radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.08) 0%, transparent 60%);
+}
+
+body {
+    background-color: var(--bg-base);
+    background-image: var(--bg-radial-glow);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: var(--text-main);
+    font-family: var(--font-sans);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+  50% { opacity: .8; box-shadow: 0 0 5px rgba(255, 215, 0, 0.1); }
+}
+.custom-animate-pulse-glow {
+  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0b101a; }
+::-webkit-scrollbar-thumb { background: #131927; border-radius: 4px; border: 1px solid #1e293b; }
+::-webkit-scrollbar-thumb:hover { background: #1e293b; }

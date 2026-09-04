@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-voltage-yellow: #FBC02D;
+  --color-graphite: #1d222b;
+  --color-deep-space: #0B1120;
+  --color-success-green: #10B981;
+  --color-off-white: #f8fafc;
+  --color-error-red: #EF4444;
+  
+  --color-app-bg: #0B1120;
+  --color-app-card: #1d222b;
+  --color-app-cardBorder: #2e3545;
+  --color-app-yellow: #FBC02D;
+  --color-app-yellowDark: #ca8a04;
+  --color-app-textMuted: #94a3b8;
+  --color-app-textDark: #64748b;
+
+  --color-gray-900: #0f172a;
+  --color-gray-800: #2e3545; /* Matches app.cardBorder */
+  --color-gray-700: #334155;
+  --color-gray-600: #475569;
+  --color-gray-500: #64748b; /* Matches app.textDark */
+  --color-gray-400: #94a3b8; /* Matches app.textMuted */
+  --color-gray-300: #cbd5e1;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+.animate-shake {
+  animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+  50% { opacity: .8; box-shadow: 0 0 5px rgba(255, 215, 0, 0.1); }
+}
+.custom-animate-pulse-glow {
+  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--color-deep-space, #0B1120); }
+::-webkit-scrollbar-thumb { background: var(--color-graphite, #1d222b); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2b3340; }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-text-fill-color: #E0E0E0 !important;
+    transition: background-color 999999s ease-in-out 0s;
+}

@@ -1,0 +1,13 @@
+{
+  "name": "schollygov1-unified",
+  "version": "1.0.0",
+  "description": "Unified startup for SchollyGo Frontend and Backend",
+  "scripts": {
+    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:frontend": "cd frontend/schollygov1 && npm run dev",
+    "start:backend": "cd schollygov1-backend && python -m uvicorn main:app --reload"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchollyGo - Partner With Us</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind v4 Browser (for development/preview) -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+    <!-- Tailwind Config for CDN to recognize the theme vars just in case -->
+    <style type="text/tailwindcss">
+        @theme {
+            --color-voltage-yellow: #FBC02D;
+            --color-graphite: #1d222b;
+            --color-deep-space: #0B1120;
+            --color-success-green: #10B981;
+            --color-off-white: #f8fafc;
+            
+            --color-app-bg: #0B1120;
+            --color-app-card: #1d222b;
+            --color-app-cardBorder: #2e3545;
+            --color-app-yellow: #FBC02D;
+            --color-app-yellowDark: #ca8a04;
+            --color-app-textMuted: #94a3b8;
+            --color-app-textDark: #64748b;
+
+            --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+            --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+        }
+    </style>
+</head>
+<body class="bg-app-bg text-white font-sans antialiased selection:bg-app-yellow selection:text-app-bg min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 border-b border-app-cardBorder bg-app-bg/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0 flex items-center cursor-pointer animate-fade-in hover:opacity-90 transition-opacity">
+                    <a href="index.html"><img src="logo.svg" alt="SchollyGo Logo" class="h-10 w-auto" /></a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="index.html" class="text-app-textMuted hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</a>
+                        <a href="students.html" class="text-app-textMuted hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">For Students</a>
+                        <a href="partners.html" class="text-white bg-app-card border border-app-cardBorder px-3 py-2 rounded-md text-sm font-semibold transition-colors shadow-sm">Partner with Us</a>
+                    </div>
+                </div>
+                <div>
+                    <a href="#" class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-app-bg bg-app-yellow hover:bg-app-yellowDark transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_15px_rgba(251,192,45,0.3)] hover:shadow-[0_0_25px_rgba(251,192,45,0.5)]">
+                        Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="flex-grow pt-32 pb-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+        
+        <!-- Background Glow -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-yellow/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+        <div class="z-10 animate-fade-in max-w-4xl mx-auto space-y-8">
+            <h2 class="text-sm font-bold text-app-yellow uppercase tracking-wider mb-2">Partner With Us</h2>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+                Grow Your Institution. <br class="hidden md:block" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-app-yellow to-yellow-200">Empower Every Student.</span>
+            </h1>
+            
+            <p class="mt-4 max-w-2xl text-xl text-app-textMuted mx-auto mb-10 leading-relaxed">
+                Join us in transforming the way students learn and educators teach. Whether you're a coaching institute, school, or independent educator, our platform provides the digital tools you need to deliver a better learning experience, improve student outcomes, and expand your reach.
+            </p>
+        </div>
+    </main>
+
+    <!-- Why Partner With Us? -->
+    <section class="py-24 bg-graphite border-y border-app-cardBorder relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Why Partner With Us?</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 1 -->
+                <div class="bg-app-card rounded-2xl p-8 border border-app-cardBorder hover:border-app-yellow/50 transition-colors duration-300 group">
+                    <div class="w-12 h-12 rounded-xl bg-app-bg border border-app-cardBorder flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-app-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Strengthen Your Teaching</h3>
+                    <p class="text-app-textMuted leading-relaxed">Deliver structured learning with digital assignments, quizzes, study materials, and progress tracking—all from one platform.</p>
+                </div>
+                <!-- 2 -->
+                <div class="bg-app-card rounded-2xl p-8 border border-app-cardBorder hover:border-app-yellow/50 transition-colors duration-300 group">
+                    <div class="w-12 h-12 rounded-xl bg-app-bg border border-app-cardBorder flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-app-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Monitor Student Performance</h3>
+                    <p class="text-app-textMuted leading-relaxed">Gain real-time insights into student progress, identify learning gaps, and provide timely support to help every learner succeed.</p>
+                </div>
+                <!-- 3 -->
+                <div class="bg-app-card rounded-2xl p-8 border border-app-cardBorder hover:border-app-yellow/50 transition-colors duration-300 group">
+                    <div class="w-12 h-12 rounded-xl bg-app-bg border border-app-cardBorder flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-app-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Share Your Content</h3>
+                    <p class="text-app-textMuted leading-relaxed">Upload your own notes, worksheets, videos, and previous year papers, and make them available to your students whenever they need them.</p>
+                </div>
+                <!-- 4 -->
+                <div class="bg-app-card rounded-2xl p-8 border border-app-cardBorder hover:border-app-yellow/50 transition-colors duration-300 group">
+                    <div class="w-12 h-12 rounded-xl bg-app-bg border border-app-cardBorder flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-app-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Simplify Classroom Management</h3>
+                    <p class="text-app-textMuted leading-relaxed">Manage batches, assignments, announcements, and student records through a centralized dashboard, reducing administrative work.</p>
+                </div>
+                <!-- 5 -->
+                <div class="bg-app-card rounded-2xl p-8 border border-app-cardBorder hover:border-app-yellow/50 transition-colors duration-300 group">
+                    <div class="w-12 h-12 rounded-xl bg-app-bg border border-app-cardBorder flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-app-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Expand Your Reach</h3>
+                    <p class="text-app-textMuted leading-relaxed">Offer a modern digital learning experience that complements your classroom teaching and enables students to continue learning beyond the classroom.</p>
+                </div>
+                <!-- 6 -->
+                <div class="bg-app-card rounded-2xl p-8 border border-app-cardBorder hover:border-app-yellow/50 transition-colors duration-300 group">
+                    <div class="w-12 h-12 rounded-xl bg-app-bg border border-app-cardBorder flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-app-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Dedicated Support</h3>
+                    <p class="text-app-textMuted leading-relaxed">From onboarding to ongoing assistance, our team works with you to ensure a smooth and successful experience for both educators and students.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Two-column list section -->
+    <section class="py-24 bg-app-bg relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <!-- Who Can Partner With Us? -->
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-8 border-b border-app-cardBorder pb-4">Who Can Partner With Us?</h2>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-app-yellow/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-app-yellow/20 flex items-center justify-center flex-shrink-0 text-app-yellow">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Coaching Institutes</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-app-yellow/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-app-yellow/20 flex items-center justify-center flex-shrink-0 text-app-yellow">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Schools</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-app-yellow/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-app-yellow/20 flex items-center justify-center flex-shrink-0 text-app-yellow">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Private Tutors</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-app-yellow/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-app-yellow/20 flex items-center justify-center flex-shrink-0 text-app-yellow">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Educational Organizations</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-app-yellow/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-app-yellow/20 flex items-center justify-center flex-shrink-0 text-app-yellow">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Training Academies</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Partnership Benefits -->
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-8 border-b border-app-cardBorder pb-4">Partnership Benefits</h2>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-success-green/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center flex-shrink-0 text-success-green">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Dedicated institute dashboard</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-success-green/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center flex-shrink-0 text-success-green">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Student and batch management</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-success-green/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center flex-shrink-0 text-success-green">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Digital assignments and assessments</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-success-green/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center flex-shrink-0 text-success-green">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Content upload and distribution</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-success-green/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center flex-shrink-0 text-success-green">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Performance analytics and reports</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-success-green/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center flex-shrink-0 text-success-green">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Secure access for students and teachers</span>
+                        </li>
+                        <li class="flex items-center gap-4 bg-graphite p-5 rounded-xl border border-app-cardBorder hover:border-success-green/30 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center flex-shrink-0 text-success-green">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-lg text-white">Ongoing platform updates and support</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 bg-graphite border-y border-app-cardBorder text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-app-yellow/10 via-transparent to-transparent opacity-50"></div>
+        <div class="max-w-4xl mx-auto px-4 relative z-10">
+            <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
+                Let's Build Better Learning Together
+            </h2>
+            <p class="text-xl text-app-textMuted mb-10 max-w-3xl mx-auto">
+                Become a partner and provide your students with an engaging, data-driven learning experience while simplifying the way you teach and manage your institution.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button onclick="document.getElementById('exploreModal').classList.remove('hidden')" class="w-full sm:w-auto px-10 py-5 border border-transparent text-lg font-bold rounded-xl text-app-bg bg-app-yellow hover:bg-app-yellowDark transition-all duration-200 transform hover:scale-105 shadow-[0_0_20px_rgba(251,192,45,0.4)]">
+                    Become a Partner
+                </button>
+                <button onclick="document.getElementById('exploreModal').classList.remove('hidden')" class="w-full sm:w-auto px-10 py-5 border border-app-cardBorder text-lg font-bold rounded-xl text-white bg-app-card hover:bg-app-cardBorder transition-all duration-200 transform hover:scale-105">
+                    Request a Demo
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-app-bg py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-xl tracking-tight text-white">Scholly<span class="text-app-yellow">Go</span></span>
+            </div>
+            <div class="text-app-textMuted text-sm">
+                &copy; 2026 SchollyGo Inc. All rights reserved.
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="text-app-textMuted hover:text-white transition-colors">Twitter</a>
+                <a href="#" class="text-app-textMuted hover:text-white transition-colors">GitHub</a>
+                <a href="#" class="text-app-textMuted hover:text-white transition-colors">Discord</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Explore More Modal (reused from index for demo) -->
+    <div id="exploreModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
+        <div class="absolute inset-0 bg-app-bg/80 backdrop-blur-sm" onclick="document.getElementById('exploreModal').classList.add('hidden')"></div>
+        <div class="relative bg-app-card border border-app-cardBorder rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+            <button onclick="document.getElementById('exploreModal').classList.add('hidden')" class="absolute top-4 right-4 text-app-textMuted hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <h3 class="text-2xl font-bold text-white mb-2">Partner with SchollyGo</h3>
+            <p class="text-app-textMuted mb-6">Drop your institution's details below and our partnership team will reach out shortly.</p>
+            <form class="space-y-4" onsubmit="event.preventDefault(); document.getElementById('exploreModal').classList.add('hidden'); alert('Thank you! We will reach out soon.');">
+                <div>
+                    <label class="block text-sm font-medium text-app-textMuted mb-1">Institution Name <span class="text-error-red">*</span></label>
+                    <input type="text" required class="w-full px-4 py-3 rounded-xl bg-app-bg border border-app-cardBorder text-white focus:outline-none focus:border-app-yellow focus:ring-1 focus:ring-app-yellow transition-colors" placeholder="Acme Academy">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-app-textMuted mb-1">Contact Number <span class="text-error-red">*</span></label>
+                    <input type="tel" required class="w-full px-4 py-3 rounded-xl bg-app-bg border border-app-cardBorder text-white focus:outline-none focus:border-app-yellow focus:ring-1 focus:ring-app-yellow transition-colors" placeholder="+1 (555) 000-0000">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-app-textMuted mb-1">Work Email <span class="text-gray-500 text-xs ml-1">(Optional)</span></label>
+                    <input type="email" class="w-full px-4 py-3 rounded-xl bg-app-bg border border-app-cardBorder text-white focus:outline-none focus:border-app-yellow focus:ring-1 focus:ring-app-yellow transition-colors" placeholder="hello@acme.edu">
+                </div>
+                <button type="submit" class="w-full mt-6 px-8 py-4 border border-transparent text-base font-bold rounded-xl text-app-bg bg-app-yellow hover:bg-app-yellowDark transition-all duration-200">
+                    Submit Inquiry
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
