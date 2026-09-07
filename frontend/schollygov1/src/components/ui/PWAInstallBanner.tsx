@@ -53,12 +53,17 @@ export default function PWAInstallBanner() {
     }, []);
 
     const handleInstallClick = async () => {
-        setIsVisible(false);
-
         if (!deferredPrompt) return;
 
+        // CRITICAL: Call prompt() synchronously BEFORE any React state updates!
+        // If we call setIsVisible(false) first, React's re-render microtasks can 
+        // cause Chrome to lose the "user gesture" context, making the prompt fail silently.
         deferredPrompt.prompt();
+
         const { outcome } = await deferredPrompt.userChoice;
+        
+        // Now we can safely hide our custom UI
+        setIsVisible(false);
         setDeferredPrompt(null);
     };
 
