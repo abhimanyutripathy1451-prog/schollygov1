@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { BarChart3, Target, CheckCircle2, Award, Zap, ArrowLeft, Loader2, AlertTriangle, Crosshair, TrendingUp, Clock, ChevronDown, ChevronUp, Timer, RotateCcw, Star, Trophy } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth';
 import { Card } from '../../components/ui/Card';
@@ -41,6 +41,20 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
     const [isLoading, setIsLoading] = useState(true);
     const [fetchError, setFetchError] = useState<string | null>(null);
     const [activeSubjectId, setActiveSubjectId] = useState<number | null>(null);
+    const [isSubjectDropdownOpen, setIsSubjectDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsSubjectDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [dropdownRef]);
 
     useEffect(() => {
         const loadAnalytics = async () => {
@@ -210,110 +224,126 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
     });
 
     return (
-        <div className="px-4 py-8 max-w-5xl mx-auto pb-32 flex-1 w-full">
-            <button onClick={() => onNavigate('dashboard')} className="flex md:hidden items-center gap-2 text-text-secondary hover:text-brand-primary text-xs font-black uppercase tracking-widest mb-6 transition-colors cursor-pointer active:scale-95 group">
-                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Basecamp
-            </button>
-
-            {/* Header Section */}
-            <Card variant="gamified" className="mb-8 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 group">
-                <div className="absolute -right-20 -top-20 w-64 h-64 bg-brand-primary/20 rounded-full blur-3xl pointer-events-none group-hover:bg-brand-primary/30 transition-colors duration-500"></div>
-                <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-[1.25rem] bg-bg-surface-elevated/80 flex items-center justify-center border-2 border-brand-primary/50 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 shadow-inner overflow-hidden">
-                            <div className="text-brand-primary group-hover:drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] transition-all">
-                                <BarChart3 className="w-8 h-8 md:w-10 md:h-10" />
-                            </div>
+        <div className="flex flex-col w-full min-h-full font-sans text-white relative z-10 bg-bg-app">
+            {/* Mobile Header */}
+            <header className="md:hidden flex items-center justify-between p-4 sticky top-0 bg-deep-space/90 backdrop-blur-md z-30 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                    <button onClick={() => onNavigate('dashboard')} className="text-text-secondary hover:text-white transition-colors p-1 -ml-1 cursor-pointer active:scale-95">
+                        <ArrowLeft className="w-6 h-6" />
+                    </button>
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-bg-surface rounded-lg flex items-center justify-center border border-brand-primary/30 text-brand-primary">
+                            <BarChart3 className="w-4 h-4" />
                         </div>
-                        <div>
-                            <div className="flex flex-wrap items-center gap-2 mb-1.5 md:mb-2">
-                                <Badge variant="milestone">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-bg-surface animate-pulse mr-1 inline-block"></span>
-                                    Overall Progress
-                                </Badge>
-                            </div>
-                            <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-orange-300 tracking-tight mb-2 md:mb-1 drop-shadow-sm">
-                                Performance Overview
-                            </h1>
-                        </div>
+                        <span className="font-black text-lg text-white">Performance</span>
                     </div>
                 </div>
-            </Card>
+                <div className="flex items-center gap-3">
+                </div>
+            </header>
 
-            {/* Top Level KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                {/* Total XP Earned */}
-                <Card variant="default" className="p-4 md:p-6 flex flex-col items-center justify-center text-center shadow-lg transition-transform hover:-translate-y-1 relative overflow-hidden group">
-                    <Star className="absolute -top-4 -right-4 w-16 h-16 text-brand-primary opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
-                    <div className="relative z-10 flex flex-col h-full justify-between items-center gap-2">
-                        <Star className="w-6 h-6 text-brand-primary mb-1" />
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-3xl md:text-4xl font-black text-white leading-none tracking-tight">{currentXp}</span>
-                            <span className="text-sm font-bold text-brand-primary">XP</span>
+            <div className="p-4 md:p-8 max-w-5xl mx-auto w-full flex-1">
+                {/* Header Section */}
+                <Card variant="gamified" className="mb-6 p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group">
+                    <div className="relative z-10 w-full flex flex-col gap-5 md:gap-8">
+                        <div className="flex items-center gap-3 sm:gap-5 w-full">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 shrink-0 rounded-[1rem] md:rounded-[1.25rem] bg-brand-primary/5 flex items-center justify-center border border-brand-primary/20 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] relative overflow-hidden transition-colors">
+                                <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/10 to-transparent opacity-50"></div>
+                                <div className="text-brand-primary relative z-10">
+                                    <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" />
+                                </div>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2 mb-1 sm:mb-2">
+                                    <Badge variant="outline" className="text-[10px] uppercase tracking-widest shadow-inner border-yellow-600/30">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-bg-surface animate-pulse mr-1 inline-block"></span>
+                                        Overall Progress
+                                    </Badge>
+                                </div>
+                                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-orange-300 tracking-tight leading-tight truncate whitespace-normal drop-shadow-sm">
+                                    Performance Overview
+                                </h2>
+                            </div>
                         </div>
-                        <div className="text-xs font-semibold tracking-wider text-text-secondary uppercase mt-1">Total XP Earned</div>
+                        <div className="grid grid-cols-2 md:flex md:flex-row gap-2 sm:gap-3 md:gap-4 w-full">
+                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center">
+                                <div className="text-white font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5">{currentXp}</div>
+                                <div className="text-[10px] sm:text-xs font-semibold tracking-wider text-text-secondary uppercase">Total XP Earned</div>
+                            </div>
+                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center relative overflow-hidden group/accuracy">
+                                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-primary/20 to-orange-500/20 border-r-2 border-orange-500/50 transition-all duration-1000" style={{ width: `${Math.round(avgOverallAccuracy)}%` }}></div>
+                                <div className="text-brand-primary font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5 relative z-10">{Math.round(avgOverallAccuracy)}%</div>
+                                <div className="text-[10px] sm:text-xs font-semibold tracking-wider text-text-secondary uppercase relative z-10">Avg Accuracy</div>
+                            </div>
+                            <div className="col-span-2 md:col-span-1 bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center">
+                                <div className="text-emerald-400 font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5 flex justify-center items-center gap-1">{proficientTopics}</div>
+                                <div className="text-[10px] sm:text-xs font-semibold tracking-wider text-text-secondary uppercase">Chapters Mastered</div>
+                            </div>
+                            <div className="col-span-2 md:col-span-1 bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center">
+                                <div className="text-purple-400 font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5 flex justify-center items-center gap-1">{formatTime(totalTimeSeconds)}</div>
+                                <div className="text-[10px] sm:text-xs font-semibold tracking-wider text-text-secondary uppercase">Time Invested</div>
+                            </div>
+                        </div>
                     </div>
                 </Card>
 
-                {/* Avg Accuracy */}
-               <Card variant="default" className="p-4 md:p-6 flex flex-col items-center justify-center text-center shadow-lg transition-transform hover:-translate-y-1 relative overflow-hidden group">
-                   <Crosshair className="absolute -top-4 -right-4 w-16 h-16 text-blue-400 opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
-                   <div className="relative z-10 flex flex-col h-full justify-between items-center gap-2">
-                       <Crosshair className="w-6 h-6 text-blue-400 mb-1" />
-                       <div className="flex items-baseline gap-1">
-                           <span className="text-3xl md:text-4xl font-black text-white leading-none">{Math.round(avgOverallAccuracy)}</span>
-                           <span className="text-sm font-bold text-blue-400">%</span>
-                       </div>
-                       <div className="text-xs font-semibold tracking-wider text-text-secondary uppercase mt-1">Avg Accuracy</div>
-                   </div>
-               </Card>
-               
-               {/* Chapters Mastered */}
-               <Card variant="default" className="p-4 md:p-6 flex flex-col items-center justify-center text-center shadow-lg transition-transform hover:-translate-y-1 relative overflow-hidden group">
-                   <Trophy className="absolute -top-4 -right-4 w-16 h-16 text-emerald-400 opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
-                   <div className="relative z-10 flex flex-col h-full justify-between items-center gap-2">
-                       <Trophy className="w-6 h-6 text-emerald-400 mb-1" />
-                       <div className="flex items-baseline gap-1.5">
-                           <span className="text-3xl md:text-4xl font-black text-white leading-none">{proficientTopics}</span>
-                       </div>
-                       <div className="text-xs font-semibold tracking-wider text-text-secondary uppercase mt-1">Chapters Mastered</div>
-                   </div>
-               </Card>
-               
-               {/* Time Invested */}
-               <Card variant="default" className="p-4 md:p-6 flex flex-col items-center justify-center text-center shadow-lg transition-transform hover:-translate-y-1 relative overflow-hidden group">
-                   <Clock className="absolute -top-4 -right-4 w-16 h-16 text-purple-400 opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
-                   <div className="relative z-10 flex flex-col h-full justify-between items-center gap-2">
-                       <Clock className="w-6 h-6 text-purple-400 mb-1" />
-                       <div className="flex items-baseline gap-1">
-                           <span className="text-2xl md:text-3xl font-black text-white leading-none tracking-tight">{formatTime(totalTimeSeconds)}</span>
-                       </div>
-                       <div className="text-xs font-semibold tracking-wider text-text-secondary uppercase mt-1">Time Invested</div>
-                   </div>
-               </Card>
-            </div>
 
+            {/* Subject Filters Dropdown */}
+            {subjectDetails.length > 0 && (
+                <div className="mb-10 relative z-[100] isolate mt-2" ref={dropdownRef}>
+                    <button
+                        onClick={() => setIsSubjectDropdownOpen(!isSubjectDropdownOpen)}
+                        className="w-full md:w-[320px] min-h-[44px] flex justify-between items-center bg-bg-surface border-2 border-border-subtle/50 text-white px-5 py-3 md:py-2 rounded-xl hover:border-brand-primary/50 hover:bg-bg-surface transition-all focus:outline-none shadow-inner"
+                    >
+                        <div className="flex flex-col items-start leading-tight pr-4 text-left overflow-hidden">
+                            <span className="font-bold text-xs text-text-secondary uppercase tracking-widest">
+                                Selected Subject
+                            </span>
+                            <span className="text-sm font-black truncate w-full mt-1 text-brand-primary">
+                                {subjectDetails.find(s => s.subject_id === activeSubjectId)?.name || 'Subject'}
+                            </span>
+                        </div>
+                        <div className={`w-8 h-8 rounded-full bg-bg-surface-elevated flex items-center justify-center transition-transform duration-300 ${isSubjectDropdownOpen ? 'rotate-180 bg-brand-primary/20' : ''}`}>
+                            <ChevronDown className={`w-4 h-4 ${isSubjectDropdownOpen ? 'text-brand-primary' : 'text-text-secondary'}`} />
+                        </div>
+                    </button>
 
-            {/* Pill Filter Navigation */}
-            <div className="flex overflow-x-auto hide-scrollbar gap-2 mb-8 items-center justify-center pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-                {subjectDetails.map((subj) => {
-                    const isActive = activeSubjectId === subj.subject_id;
-                    return (
-                        <button
-                            key={subj.subject_id}
-                            onClick={() => setActiveSubjectId(subj.subject_id)}
-                            className={`px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase transition-all duration-300 border-2 border-b-[4px] active:scale-95 flex items-center gap-2 ${
-                                isActive 
-                                    ? 'bg-brand-primary text-black border-brand-hover shadow-[0_5px_15px_rgba(250,204,21,0.4)]' 
-                                    : 'bg-bg-surface text-text-secondary border-border-subtle/50 hover:border-brand-primary hover:text-brand-primary'
-                            }`}
-                        >
-                            {subj.icon_class ? <i className={subj.icon_class}></i> : <Zap className="w-3.5 h-3.5" />}
-                            {subj.name}
-                        </button>
-                    );
-                })}
-            </div>
+                    <AnimatePresence>
+                        {isSubjectDropdownOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                                transition={{ duration: 0.15, ease: 'easeOut' }}
+                                className="absolute top-full left-0 mt-3 w-full md:w-[380px] bg-bg-surface border-2 border-border-subtle/50 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden z-[100]"
+                            >
+                                <div className="max-h-80 overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent py-2">
+                                    {subjectDetails.map((subj) => (
+                                        <button
+                                            key={subj.subject_id}
+                                            onClick={() => {
+                                                setActiveSubjectId(subj.subject_id);
+                                                setIsSubjectDropdownOpen(false);
+                                            }}
+                                            className={`w-full text-left px-5 py-3 transition-colors group flex items-center gap-3 ${activeSubjectId === subj.subject_id
+                                                    ? 'bg-brand-primary/10 border-l-4 border-brand-primary'
+                                                    : 'hover:bg-gray-800/50 border-l-4 border-transparent'
+                                                }`}
+                                        >
+                                            <div className="w-8 h-8 rounded-lg bg-bg-surface-elevated flex items-center justify-center border border-border-subtle shrink-0">
+                                                {subj.icon_class ? <i className={`${subj.icon_class} text-sm ${activeSubjectId === subj.subject_id ? 'text-brand-primary' : 'text-text-secondary'}`}></i> : <Zap className={`w-4 h-4 ${activeSubjectId === subj.subject_id ? 'text-brand-primary' : 'text-text-secondary'}`} />}
+                                            </div>
+                                            <div>
+                                                <span className={`font-bold text-sm block leading-snug group-hover:text-white transition-colors ${activeSubjectId === subj.subject_id ? 'text-brand-primary' : 'text-gray-300'}`}>{subj.name}</span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            )}
 
             {/* Detailed Subject Breakdown */}
             <div className="space-y-4">
@@ -426,6 +456,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
                     );
                 })}
             </div>
+        </div>
         </div>
     );
 }

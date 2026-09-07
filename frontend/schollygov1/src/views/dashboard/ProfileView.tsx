@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Phone, GraduationCap, Edit2, Shield, Lock, Trophy, Zap, ShieldCheck, Check, ArrowRight, ArrowLeft, Stars } from 'lucide-react';
+import { User, Phone, GraduationCap, Edit2, Shield, Lock, Trophy, Zap, ShieldCheck, Check, ArrowRight, ArrowLeft, Stars, Copy } from 'lucide-react';
 import { getRankTitle } from '../../utils/gamification';
 import { useAuthStore } from '../../stores/auth';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
@@ -50,6 +50,9 @@ export default function ProfileView({ apiBase, onNavigate }: ProfileViewProps) {
 
     // Passkey modal state (now using RecoveryModal)
     const [showForgotPasskey, setShowForgotPasskey] = useState(false);
+    
+    // Copy state
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -174,19 +177,26 @@ export default function ProfileView({ apiBase, onNavigate }: ProfileViewProps) {
     }
 
     return (
-        <div className="p-4 pb-20 md:p-8 max-w-3xl mx-auto font-sans space-y-8 relative">
-            
-            {/* Back Navigation */}
-            {onNavigate && (
-                <button
-                    onClick={() => onNavigate('dashboard')}
-                    className="inline-flex items-center gap-2 text-text-primary bg-bg-surface-elevated hover:bg-brand-primary/10 hover:text-brand-primary border border-border-subtle transition-all duration-300 cursor-pointer font-bold text-sm mb-6 px-5 py-2.5 rounded-xl shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                    Back to Basecamp
-                </button>
-            )}
+        <div className="flex flex-col w-full min-h-full font-sans text-white relative z-10 bg-bg-app">
+            {/* Mobile Header */}
+            <header className="md:hidden flex items-center justify-between p-4 sticky top-0 bg-deep-space/90 backdrop-blur-md z-30 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                    {onNavigate && (
+                        <button onClick={() => onNavigate('dashboard')} className="text-text-secondary hover:text-white transition-colors p-1 -ml-1 cursor-pointer active:scale-95">
+                            <ArrowLeft className="w-6 h-6" />
+                        </button>
+                    )}
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-bg-surface rounded-lg flex items-center justify-center border border-brand-primary/30 text-brand-primary">
+                            <User className="w-4 h-4" />
+                        </div>
+                        <span className="font-black text-lg text-white">Profile</span>
+                    </div>
+                </div>
+            </header>
 
+            <div className="p-4 pb-20 md:p-8 max-w-3xl mx-auto w-full flex-1 space-y-8 relative">
+            
             {/* Global Notifications */}
             <AnimatePresence>
                 {errorMsg && (
@@ -268,9 +278,24 @@ export default function ProfileView({ apiBase, onNavigate }: ProfileViewProps) {
                     </p>
                     <p className="text-sm font-medium text-text-secondary">Invite friends to SchollyGo and earn bonus XP!</p>
                 </div>
-                <div className="bg-bg-app border-2 border-brand-primary/50 text-brand-primary rounded-xl px-6 py-3 font-mono font-black text-xl tracking-widest shadow-inner relative overflow-hidden group select-all cursor-text">
-                    <div className="absolute inset-0 bg-brand-primary/10 translate-y-full group-hover:translate-y-0 transition-transform"></div>
-                    <span className="relative z-10">{profile.referral_code || 'N/A'}</span>
+                <div className="flex items-center gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+                    <div className="bg-bg-app border-2 border-brand-primary/50 text-brand-primary rounded-xl px-6 py-3 font-mono font-black text-xl tracking-widest shadow-inner relative overflow-hidden group select-all cursor-text flex-1 text-center sm:text-left">
+                        <div className="absolute inset-0 bg-brand-primary/10 translate-y-full group-hover:translate-y-0 transition-transform"></div>
+                        <span className="relative z-10">{profile.referral_code || 'N/A'}</span>
+                    </div>
+                    {profile.referral_code && (
+                        <Button 
+                            variant="primary" 
+                            className="h-full min-h-[52px] px-4"
+                            onClick={() => {
+                                navigator.clipboard.writeText(profile.referral_code);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
+                            }}
+                        >
+                            {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                        </Button>
+                    )}
                 </div>
             </motion.div>
 
@@ -410,8 +435,8 @@ export default function ProfileView({ apiBase, onNavigate }: ProfileViewProps) {
                 </div>
 
                 {/* Footer Navigation */}
-                <div className="p-4 border-t border-border-subtle/30 bg-bg-surface flex items-center justify-between">
-                    {currentStep > 1 ? (
+                <div className={`p-4 border-t border-border-subtle/30 bg-bg-surface flex items-center ${currentStep === 1 ? 'justify-center' : 'justify-between'}`}>
+                    {currentStep > 1 && (
                         <button
                             type="button"
                             onClick={() => setCurrentStep(prev => prev - 1)}
@@ -420,8 +445,6 @@ export default function ProfileView({ apiBase, onNavigate }: ProfileViewProps) {
                             <ArrowLeft className="w-4 h-4" />
                             Back
                         </button>
-                    ) : (
-                        <div />
                     )}
                     
                     {currentStep < 3 && (
@@ -429,7 +452,7 @@ export default function ProfileView({ apiBase, onNavigate }: ProfileViewProps) {
                             variant="primary"
                             size="sm"
                             onClick={() => setCurrentStep(prev => prev + 1)}
-                            className="ml-auto"
+                            className={currentStep === 1 ? 'w-full' : 'ml-auto'}
                         >
                             CONTINUE <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
@@ -488,6 +511,7 @@ export default function ProfileView({ apiBase, onNavigate }: ProfileViewProps) {
                 apiBase={apiBase} 
             />
 
+        </div>
         </div>
     );
 }

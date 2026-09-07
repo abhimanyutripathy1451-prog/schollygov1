@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   LayoutDashboard, BookOpen, ScrollText, Map, TrendingUp, Play, Bell,
@@ -40,6 +40,14 @@ export default function App() {
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
   const [selectedNextTopic, setSelectedNextTopic] = useState<any>(null);
   const [quizSettings, setQuizSettings] = useState<{ difficulty?: 'easy'|'medium'|'hard'|'adaptive', type?: 'practice'|'assignment'|'mistakes', assignmentId?: number }>({});
+
+  const mainRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+  }, [currentRoute, selectedSubject, selectedChapter]);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
@@ -296,7 +304,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto relative bg-transparent pb-24 md:pb-8">
+      <main ref={mainRef} className="flex-1 overflow-y-auto relative bg-transparent pb-24 md:pb-8">
         
         {/* Decorative Background Glows */}
         <div className="fixed top-[-10%] left-[20%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
