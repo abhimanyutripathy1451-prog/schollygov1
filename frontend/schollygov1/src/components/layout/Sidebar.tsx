@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-bg-app transform transition-transform duration-300 ease-in-out
-        md:relative md:flex md:translate-x-0 flex-col justify-between border-r border-border-subtle
+        flex md:relative md:translate-x-0 flex-col justify-between border-r border-border-subtle
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         ${isSidebarCollapsed ? 'md:w-[80px]' : 'md:w-64'}
       `}>

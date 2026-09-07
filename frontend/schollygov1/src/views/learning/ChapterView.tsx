@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     ArrowLeft, Bell, Medal, Lock, ChevronRight, RotateCcw, Info, Loader2, AlertOctagon,
-    Award, Shield, Swords, Star, LockOpen, Sparkles, FolderOpen,
+    Award, Shield, Swords, Star, LockOpen, Sparkles, FolderOpen, Map as MapIcon,
     Calculator, FlaskConical, Globe, Book, BookOpen, ChevronDown, Stars
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -301,61 +301,53 @@ export default function ChapterView({
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="relative cursor-pointer active:scale-95">
-                        <Bell className="w-6 h-6 text-gray-400" />
-                        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-semantic-error rounded-full border-2 border-deep-space"></span>
-                    </div>
+                    {/* Bell icon removed */}
                 </div>
             </header>
 
             <div className="p-4 md:p-8 max-w-5xl mx-auto w-full flex-1">
-                {/* Back Button outside Hero */}
-                {currentSubjectDetails && (
-                    <button onClick={() => onNavigate('dashboard')} className="flex items-center gap-2 text-text-secondary hover:text-brand-primary text-xs font-black uppercase tracking-widest mb-6 transition-colors cursor-pointer active:scale-95 group">
-                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Basecamp
-                    </button>
-                )}
+                {/* Back Button outside Hero - Removed because nav bar already has back button */}
 
                 {/* Subject Hero Section */}
                 {currentSubjectDetails && (
-                    <Card variant="gamified" className="mb-8 p-6 md:p-8 flex flex-col relative overflow-hidden group">
-                        <div className="relative z-10 w-full flex flex-col gap-8">
-                            <div className="flex items-center gap-5 w-full">
-                                <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-[1.25rem] bg-brand-primary/5 flex items-center justify-center border border-brand-primary/20 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] relative overflow-hidden transition-colors">
+                    <Card variant="gamified" className="mb-6 p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group">
+                        <div className="relative z-10 w-full flex flex-col gap-5 md:gap-8">
+                            <div className="flex items-center gap-3 sm:gap-5 w-full">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 shrink-0 rounded-[1rem] md:rounded-[1.25rem] bg-brand-primary/5 flex items-center justify-center border border-brand-primary/20 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] relative overflow-hidden transition-colors">
                                     <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/10 to-transparent opacity-50"></div>
                                     <div className="text-brand-primary relative z-10">
-                                        {renderIcon(currentSubjectDetails.icon, "w-8 h-8 md:w-10 md:h-10")}
+                                        {renderIcon(currentSubjectDetails.icon, "w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10")}
                                     </div>
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     {user?.curriculum_code && (
-                                        <div className="flex items-center gap-2 mb-2">
+                                        <div className="flex items-center gap-2 mb-1 sm:mb-2">
                                             <Badge variant="outline" className="text-[10px] uppercase tracking-widest shadow-inner border-yellow-600/30">
                                                 {user.curriculum_code.split('_').join(' - ')}
                                             </Badge>
                                         </div>
                                     )}
-                                    <h2 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-orange-300 tracking-tight leading-tight truncate whitespace-normal drop-shadow-sm">{currentSubjectDetails.name}</h2>
+                                    <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-orange-300 tracking-tight leading-tight truncate whitespace-normal drop-shadow-sm">{currentSubjectDetails.name}</h2>
                                     {currentSubjectDetails.curriculum_medium?.toLowerCase() !== 'english' && (
-                                        <span className="block text-text-secondary font-bold mt-1">
+                                        <span className="block text-text-secondary text-sm sm:text-base font-bold mt-1">
                                             {currentSubjectDetails.name_translations?.[currentSubjectDetails.curriculum_medium?.toLowerCase() === 'hindi' ? 'hi' : currentSubjectDetails.curriculum_medium?.toLowerCase().substring(0, 2) || 'hi'] || currentSubjectDetails.name_translations?.hi}
                                         </span>
                                     )}
                                 </div>
                             </div>
-                            <div className="flex flex-col sm:flex-row flex-wrap md:flex-nowrap gap-3 md:gap-4 w-full">
-                                <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-3 py-3 md:px-5 md:py-4 flex-1 min-w-[110px] text-center">
-                                    <div className="text-white font-black text-2xl md:text-3xl leading-none mb-1.5">{availableModules.length}</div>
-                                    <div className="text-xs font-semibold tracking-wider text-text-secondary uppercase">Total Modules</div>
+                            <div className="grid grid-cols-2 md:flex md:flex-row gap-2 sm:gap-3 md:gap-4 w-full">
+                                <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center">
+                                    <div className="text-white font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5">{availableModules.length}</div>
+                                    <div className="text-[10px] sm:text-xs font-semibold tracking-wider text-text-secondary uppercase">Total Modules</div>
                                 </div>
-                                <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-3 py-3 md:px-5 md:py-4 flex-1 min-w-[110px] text-center relative overflow-hidden group/accuracy">
-                                    <div className="absolute inset-0 bg-brand-primary/10" style={{ width: `${Math.round(currentSubjectDetails?.progress || 0)}%` }}></div>
-                                    <div className="text-brand-primary font-black text-2xl md:text-3xl leading-none mb-1.5 relative z-10">{Math.round(currentSubjectDetails?.progress || 0)}%</div>
-                                    <div className="text-xs font-semibold tracking-wider text-text-secondary uppercase relative z-10">Subject Mastery</div>
+                                <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center relative overflow-hidden group/accuracy">
+                                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-primary/20 to-orange-500/20 border-r-2 border-orange-500/50 transition-all duration-1000" style={{ width: `${Math.round(currentSubjectDetails?.progress || 0)}%` }}></div>
+                                    <div className="text-brand-primary font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5 relative z-10">{Math.round(currentSubjectDetails?.progress || 0)}%</div>
+                                    <div className="text-[10px] sm:text-xs font-semibold tracking-wider text-text-secondary uppercase relative z-10">Subject Mastery</div>
                                 </div>
-                                <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-3 py-3 md:px-5 md:py-4 flex-1 min-w-[110px] text-center">
-                                    <div className="text-white font-black text-2xl md:text-3xl leading-none mb-1.5">{user?.xp || 0}</div>
-                                    <div className="text-xs font-semibold tracking-wider text-text-secondary uppercase">Total XP Earned</div>
+                                <div className="col-span-2 md:col-span-1 bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center">
+                                    <div className="text-white font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5">{user?.xp || 0}</div>
+                                    <div className="text-[10px] sm:text-xs font-semibold tracking-wider text-text-secondary uppercase">Total XP Earned</div>
                                 </div>
                             </div>
                         </div>
@@ -444,7 +436,7 @@ export default function ChapterView({
                         {/* Chapters Level */}
                         <Card variant="default" className="mb-10 p-6 md:p-8 flex flex-col relative overflow-hidden group">
                             <div className="mb-6">
-                                <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-2 mb-1"><FolderOpen className="w-6 h-6 text-brand-primary fill-brand-primary" /> Curriculum Chapters</h3>
+                                <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-2 mb-1"><MapIcon className="w-6 h-6 text-brand-primary" /> Curriculum Chapters</h3>
                                 <p className="text-sm text-text-secondary font-bold">Select a chapter to view its concepts and begin practicing.</p>
                             </div>
                             {filteredChapters.length > 0 ? (
@@ -460,33 +452,33 @@ export default function ChapterView({
                                             }}
                                             className="w-full flex flex-col gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-app"
                                         >
-                                            <div className="flex flex-row items-start justify-between w-full">
-                                                <div className="flex-1 pr-4">
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <div className={`shrink-0 w-8 h-8 rounded-lg font-black flex items-center justify-center text-sm border shadow-inner ${chapter.status === 'proficient'
+                                            <div className="flex flex-row items-start justify-between w-full gap-2">
+                                                <div className="flex-1 min-w-0 pr-2 sm:pr-4">
+                                                    <div className="flex items-start sm:items-center gap-2 sm:gap-3 mb-1">
+                                                        <div className={`shrink-0 w-6 h-6 sm:w-8 sm:h-8 mt-0.5 sm:mt-0 rounded-md sm:rounded-lg font-black flex items-center justify-center text-xs sm:text-sm border shadow-inner ${chapter.status === 'proficient'
                                                                 ? 'bg-semantic-success/10 text-semantic-success border-semantic-success/30'
                                                                 : 'bg-brand-primary/10 text-brand-primary border-brand-primary/30'
                                                             }`}>
-                                                            {cIndex + 1}
+                                                            {flatChapters.findIndex(c => c.id === chapter.id) + 1}
                                                         </div>
-                                                        <h4 className="font-black text-lg text-white group-hover:text-brand-primary transition-colors leading-tight">
+                                                        <h4 className="font-black text-base sm:text-lg text-white group-hover:text-brand-primary transition-colors leading-tight break-words">
                                                             {chapter.title}
                                                         </h4>
-                                                        {chapter.status === 'proficient' && <Medal className="w-5 h-5 text-semantic-success fill-semantic-success shrink-0" />}
+                                                        {chapter.status === 'proficient' && <Medal className="w-4 h-4 sm:w-5 sm:h-5 text-semantic-success fill-semantic-success shrink-0 mt-0.5 sm:mt-0" />}
                                                     </div>
                                                     {secondaryLangCode && chapter.title_translations && (chapter.title_translations[secondaryLangCode] || chapter.title_translations.hi) && (
-                                                        <span className="text-sm font-bold text-text-secondary mt-0.5 block pl-11">
+                                                        <span className="text-xs sm:text-sm font-bold text-text-secondary mt-0.5 block pl-8 sm:pl-11">
                                                             {chapter.title_translations[secondaryLangCode] || chapter.title_translations.hi}
                                                         </span>
                                                     )}
                                                     {chapter.description && (
-                                                        <p className="text-xs text-gray-400 mt-1.5 leading-snug line-clamp-2 pl-11">
+                                                        <p className="hidden sm:block text-xs text-gray-400 mt-1.5 leading-snug line-clamp-2 pl-11">
                                                             {chapter.description}
                                                         </p>
                                                     )}
                                                 </div>
-                                                <div className="shrink-0 w-10 h-10 bg-bg-surface border-2 border-brand-primary text-brand-primary rounded-xl group-hover:bg-brand-primary group-hover:text-black transition-colors flex items-center justify-center">
-                                                    <ChevronRight className="w-5 h-5 ml-0.5" />
+                                                <div className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-bg-surface border-2 border-brand-primary text-brand-primary rounded-lg sm:rounded-xl group-hover:bg-brand-primary group-hover:text-black transition-colors flex items-center justify-center mt-0.5 sm:mt-0">
+                                                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5" />
                                                 </div>
                                             </div>
                                             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 pt-3 border-t border-white/5">

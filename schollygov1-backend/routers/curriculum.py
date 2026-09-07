@@ -9,7 +9,7 @@ router = APIRouter(prefix="/curriculum", tags=["Curriculum"])
 async def get_curriculums(conn: aiomysql.Connection = Depends(get_db)):
     """Fetches available curriculums for signup/curriculum selection."""
     async with conn.cursor(aiomysql.DictCursor) as cursor:
-        await cursor.execute("SELECT code, name, board, stream, medium, grade, type FROM curriculums ORDER BY id")
+        await cursor.execute("SELECT code, name, board, stream, medium, grade, type FROM curriculums WHERE is_active = 1 ORDER BY sequence_order, id")
         return await cursor.fetchall()
 
 @router.get("/curriculums/{curriculum_code}/grades")

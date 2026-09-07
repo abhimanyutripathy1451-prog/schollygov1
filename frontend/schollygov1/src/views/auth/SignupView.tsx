@@ -73,6 +73,7 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
     const [vaultQuestion, setVaultQuestion] = useState('');
     const [vaultAnswer, setVaultAnswer] = useState('');
     const [inviteCode, setInviteCode] = useState('');
+    const [showInviteCode, setShowInviteCode] = useState(false);
     const [inviteCodeStatus, setInviteCodeStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
     const checkInviteCodeTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -325,7 +326,7 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                 <div className="flex-1 relative z-10 overflow-y-auto no-scrollbar pb-6">
                     <AnimatePresence mode="wait">
                         {step === 1 && (
-                            <motion.div key="step1" {...stepMotion} className="space-y-6">
+                            <motion.div key="step1" {...stepMotion} className="space-y-4">
                                 <div className="flex flex-col items-center justify-center pt-2">
                                     <div className="relative group">
                                         {/* Phase 2: meaningful alt text for screen readers */}
@@ -396,9 +397,11 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                         )}
 
                         {step === 2 && (
-                            <motion.div key="step2" {...stepMotion} className="space-y-6">
+                            <motion.div key="step2" {...stepMotion} className="space-y-4">
                                 <div>
-                                    <label id="goalTypeLabel" className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block">Choose Your Arena *</label>
+                                    <label id="goalTypeLabel" className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block flex items-center">
+                                        Choose Your Arena <span className="text-semantic-error ml-1 font-bold text-sm leading-none">*</span>
+                                    </label>
                                     <div className="flex gap-3" role="radiogroup" aria-labelledby="goalTypeLabel">
                                         {/* Phase 1 fix: added `relative` so the abs-positioned checkmark badge stays inside this card */}
                                         {/* Phase 2: added focus-visible ring to both arena cards */}
@@ -451,32 +454,35 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                                         className="space-y-5"
                                     >
                                         <div>
-                                            <label id="curriculumLabel" className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block">
-                                                {goalType === 'school_board' ? 'Select Curriculum *' : 'Select Exam *'}
+                                            <label htmlFor="curriculumSelect" className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block flex items-center">
+                                                {goalType === 'school_board' ? 'Select Curriculum' : 'Select Exam'}
+                                                <span className="text-semantic-error ml-1 font-bold text-sm leading-none">*</span>
                                             </label>
-                                            {/* Phase 2: focus rings on curriculum radio buttons */}
-                                            <div role="radiogroup" aria-labelledby="curriculumLabel" className="flex flex-col gap-3">
-                                                {filteredCurriculums.length === 0 ? (
-                                                    <p className="text-sm text-text-secondary italic">No options available for this category yet.</p>
-                                                ) : (
-                                                    filteredCurriculums.map(c => (
-                                                        <button
-                                                            role="radio"
-                                                            aria-checked={selectedCurriculumCode === c.code}
-                                                            key={c.code}
-                                                            type="button"
-                                                            onClick={() => setSelectedCurriculumCode(c.code)}
-                                                            className={`px-4 py-3 rounded-card text-sm font-bold border-2 transition-all text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-1 focus-visible:ring-offset-bg-app ${
-                                                                selectedCurriculumCode === c.code
-                                                                    ? 'bg-brand-primary/10 border-brand-primary text-brand-primary'
-                                                                    : 'bg-bg-surface border-border-subtle text-text-secondary hover:border-border-subtle/80 hover:text-text-primary'
-                                                            }`}
-                                                        >
-                                                            {c.name}
-                                                        </button>
-                                                    ))
-                                                )}
-                                            </div>
+                                            {filteredCurriculums.length === 0 ? (
+                                                <div className="bg-bg-surface-elevated border border-border-subtle rounded-xl p-4 text-center">
+                                                    <p className="text-sm font-bold text-brand-primary">Coming Soon!</p>
+                                                    <p className="text-xs text-text-secondary mt-1">We are adding new curriculums soon.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="relative">
+                                                    <select
+                                                        id="curriculumSelect"
+                                                        value={selectedCurriculumCode}
+                                                        onChange={(e) => setSelectedCurriculumCode(e.target.value)}
+                                                        className="w-full bg-bg-surface border-2 border-border-subtle rounded-xl px-4 py-3 pr-10 text-text-primary text-sm font-bold focus:border-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-app transition-colors shadow-inner appearance-none cursor-pointer"
+                                                    >
+                                                        <option value="" disabled>Choose an option...</option>
+                                                        {filteredCurriculums.map(c => (
+                                                            <option key={c.code} value={c.code}>{c.name}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center" aria-hidden="true">
+                                                        <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div>
@@ -494,7 +500,7 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                         )}
 
                         {step === 3 && (
-                            <motion.div key="step3" {...stepMotion} className="space-y-5">
+                            <motion.div key="step3" {...stepMotion} className="space-y-4">
                                 {/* Phase 4: ref for auto-focus on error + onBlur inline validation */}
                                 <div>
                                     <Input
@@ -539,7 +545,9 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block">Secure Passkey (4-Digits) *</label>
+                                    <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block flex items-center">
+                                        Secure Passkey (4-Digits) <span className="text-semantic-error ml-1 font-bold text-sm leading-none">*</span>
+                                    </label>
                                     <OtpInput value={passkey} onChange={setPasskey} />
                                 </div>
 
@@ -547,7 +555,9 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                                 <h3 className="text-text-secondary text-sm font-bold uppercase tracking-wider mb-3">Secure Your Vault</h3>
 
                                 <div>
-                                    <label htmlFor="vaultQuestion" className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block">Secret Question *</label>
+                                    <label htmlFor="vaultQuestion" className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block flex items-center">
+                                        Secret Question <span className="text-semantic-error ml-1 font-bold text-sm leading-none">*</span>
+                                    </label>
                                     {/* Phase 2 & 4: custom chevron replaces OS-default arrow (appearance-none) + WCAG focus ring */}
                                     <div className="relative">
                                         <select
@@ -577,30 +587,44 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                                         value={vaultAnswer}
                                         onChange={e => setVaultAnswer(e.target.value)}
                                         placeholder="Keep it secret, keep it safe..."
+                                        autoComplete="off"
                                     />
                                 </div>
 
                                 <div aria-live="polite">
-                                    <Input
-                                        id="inviteCode"
-                                        label="Invite Code (Optional)"
-                                        value={inviteCode}
-                                        onChange={handleInviteCodeInput}
-                                        placeholder="Have a code?"
-                                        className="uppercase font-mono tracking-widest"
-                                        success={inviteCodeStatus === 'valid'}
-                                        errorText={inviteCodeStatus === 'invalid' ? "Invalid code. Leave blank if you don't have one." : undefined}
-                                        icon={inviteCodeStatus === 'checking' ? <Loader2 className="w-5 h-5 animate-spin text-brand-primary" /> : undefined}
-                                        iconPosition="right"
-                                    />
-                                    {inviteCodeStatus === 'valid' && (
-                                        <motion.div
-                                            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="mt-2 bg-semantic-success/10 border border-semantic-success/20 px-3 py-2 rounded-lg inline-block"
+                                    {!showInviteCode && !inviteCode ? (
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setShowInviteCode(true)}
+                                            className="text-xs font-bold text-brand-primary hover:text-[#FDE047] transition-colors flex items-center gap-1 cursor-pointer mt-2"
                                         >
-                                            <p className="text-xs text-semantic-success font-bold">Valid code! +50 XP will be added to your account.</p>
-                                        </motion.div>
+                                            Have an invite code?
+                                        </button>
+                                    ) : (
+                                        <div>
+                                            <Input
+                                                id="inviteCode"
+                                                label="Invite Code (Optional)"
+                                                value={inviteCode}
+                                                onChange={handleInviteCodeInput}
+                                                placeholder="Enter invite code"
+                                                className="uppercase font-mono tracking-widest"
+                                                autoComplete="off"
+                                                success={inviteCodeStatus === 'valid'}
+                                                errorText={inviteCodeStatus === 'invalid' ? "Invalid code. Leave blank if you don't have one." : undefined}
+                                                icon={inviteCodeStatus === 'checking' ? <Loader2 className="w-5 h-5 animate-spin text-brand-primary" /> : undefined}
+                                                iconPosition="right"
+                                            />
+                                            {inviteCodeStatus === 'valid' && (
+                                                <motion.div
+                                                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -5 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="mt-2 bg-semantic-success/10 border border-semantic-success/20 px-3 py-2 rounded-lg inline-block"
+                                                >
+                                                    <p className="text-xs text-semantic-success font-bold">Valid code! +50 XP will be added to your account.</p>
+                                                </motion.div>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </motion.div>
@@ -650,7 +674,7 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                 {/* Footer Navigation */}
                 {step < 4 && (
                     <div className="pt-4 mt-auto border-t border-border-subtle/30 flex items-center justify-between relative z-10">
-                        {step > 1 ? (
+                        {step > 1 && (
                             // Phase 2: focus ring + adequate padding on Back nav button
                             <button
                                 type="button"
@@ -660,8 +684,6 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                                 <ArrowLeft className="w-4 h-4" />
                                 Back
                             </button>
-                        ) : (
-                            <div></div>
                         )}
                         
                         {step === 3 ? (
@@ -675,7 +697,8 @@ export default function SignupView({ apiBase = import.meta.env.VITE_API_URL || '
                         ) : (
                             <Button
                                 onClick={handleNext}
-                                className="ml-auto"
+                                className={step === 1 ? "w-full flex justify-center items-center" : "ml-auto"}
+                                fullWidth={step === 1}
                             >
                                 CONTINUE <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>

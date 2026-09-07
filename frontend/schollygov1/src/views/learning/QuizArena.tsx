@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
     ArrowLeft, ArrowRight, Sword, Star, AlertCircle, ShieldCheck, Flame, Skull, 
     DownloadCloud, ClipboardList, Play, Timer, Check, X, TrendingUp, Trophy,
-    RotateCcw, Home, Loader2, AlertTriangle, Menu, Flag, ChevronLeft, ChevronRight, Grid
+    RotateCcw, Home, Loader2, AlertTriangle, Menu, Flag, ChevronLeft, ChevronRight, Grid, Stars
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth';
 import { Card } from '../../components/ui/Card';
@@ -234,7 +234,7 @@ export default function QuizArena({
             const data = await res.json();
 
             if (!data || data.length === 0) {
-                setFetchError("No questions found for this difficulty tier in the databank.");
+                setFetchError("NO_QUESTIONS_FOUND");
                 setIsLoading(false);
                 return;
             }
@@ -481,6 +481,23 @@ export default function QuizArena({
                         <Loader2 className="animate-spin w-12 h-12 text-brand-primary mb-6" />
                         <p className="font-bold text-white text-xl">Syncing Mastery Data...</p>
                         <p className="text-gray-400 text-sm mt-2">Uploading combat logs</p>
+                    </div>
+                ) : fetchError === 'NO_QUESTIONS_FOUND' ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center bg-bg-surface rounded-[3rem] border-2 border-border-subtle/50 border-dashed relative overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] my-auto max-h-[500px]">
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-800/30 via-transparent to-transparent pointer-events-none"></div>
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 mb-8 relative">
+                            <div className="absolute inset-0 bg-brand-primary/20 rounded-full blur-3xl animate-pulse"></div>
+                            <div className="w-full h-full bg-bg-surface border-[4px] border-border-subtle/80 rounded-[2rem] flex items-center justify-center shadow-2xl -rotate-6 hover:rotate-6 hover:scale-110 transition-transform duration-500 relative z-10 group cursor-default">
+                                <Stars className="w-10 h-10 sm:w-12 sm:h-12 text-brand-primary group-hover:scale-125 transition-transform duration-500 delay-100" />
+                            </div>
+                        </div>
+                        <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-4 tracking-tight px-4">Mission <span className="text-brand-primary">Coming Soon!</span> 🚀</h3>
+                        <p className="text-text-secondary font-bold max-w-lg text-xs sm:text-sm md:text-base leading-relaxed px-6 uppercase tracking-wider mb-8">
+                            Our master scholars are currently forging the ultimate trials for this topic.
+                        </p>
+                        <button onClick={resetToSetup} className="relative z-10 bg-brand-primary text-black font-black uppercase tracking-widest text-xs sm:text-sm px-6 py-3 sm:px-8 sm:py-4 rounded-xl border-b-4 border-yellow-600 hover:bg-yellow-400 hover:border-yellow-500 transition-all active:border-b-0 active:translate-y-1 mb-8">
+                            Return
+                        </button>
                     </div>
                 ) : fetchError ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-center">

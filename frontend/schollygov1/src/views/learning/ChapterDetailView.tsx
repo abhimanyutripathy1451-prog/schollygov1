@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     ArrowLeft, Sword, AlertOctagon, Loader2, FolderOpen, Play, 
-    ExternalLink, Download, FileText, FileDown, File, TrendingUp, AlertTriangle
+    ExternalLink, Download, FileText, FileDown, File, TrendingUp, AlertTriangle, Target
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -108,49 +108,46 @@ export default function ChapterDetailView({
             </header>
 
             <div className="p-4 md:p-8 max-w-5xl mx-auto w-full flex-1">
-                {/* Back Button outside Hero */}
-                <button onClick={onBack} className="flex items-center gap-2 text-text-secondary hover:text-brand-primary text-xs font-black uppercase tracking-widest mb-6 transition-colors cursor-pointer active:scale-95 group">
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Chapters
-                </button>
+                {/* Back Button outside Hero - Removed because nav bar already has back button */}
 
                 {/* Chapter Hero Section */}
-                <Card variant="gamified" className="mb-8 p-6 md:p-8 flex flex-col relative overflow-hidden group">
-                    <div className="relative z-10 w-full flex flex-col gap-8">
-                        <div className="flex items-center gap-5 w-full">
-                            <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-[1.25rem] bg-brand-primary/5 flex items-center justify-center border border-brand-primary/20 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] relative overflow-hidden transition-colors">
+                <Card variant="gamified" className="mb-6 p-4 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group">
+                    <div className="relative z-10 w-full flex flex-col gap-5 md:gap-8">
+                        <div className="flex items-center gap-3 sm:gap-5 w-full">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 shrink-0 rounded-[1rem] md:rounded-[1.25rem] bg-brand-primary/5 flex items-center justify-center border border-brand-primary/20 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] relative overflow-hidden transition-colors">
                                 <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/10 to-transparent opacity-50"></div>
                                 <div className="text-brand-primary relative z-10">
-                                    <FileText className="w-8 h-8 md:w-10 md:h-10" />
+                                    <FileText className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" />
                                 </div>
                             </div>
                             <div className="min-w-0 flex-1">
-                                <h2 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-orange-300 tracking-tight leading-tight truncate whitespace-normal drop-shadow-sm">{chapter?.title || chapter?.name || 'Chapter Details'}</h2>
+                                <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-orange-300 tracking-tight leading-tight truncate whitespace-normal drop-shadow-sm">{chapter?.title || chapter?.name || 'Chapter Details'}</h2>
                                 {secondaryLangCode && chapter?.title_translations && (chapter.title_translations[secondaryLangCode] || chapter.title_translations.hi) && (
-                                    <span className="block text-text-secondary font-bold mt-1">
+                                    <span className="block text-text-secondary text-sm sm:text-base font-bold mt-1">
                                         {chapter.title_translations[secondaryLangCode] || chapter.title_translations.hi}
                                     </span>
                                 )}
                             </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row flex-wrap md:flex-nowrap gap-3 md:gap-4 w-full">
-                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-3 py-3 md:px-5 md:py-4 flex-1 min-w-[110px] text-center hover:-translate-y-1 transition-transform">
-                                <div className="text-white font-black text-2xl md:text-3xl leading-none mb-1.5">{topics.length}</div>
-                                <div className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">Total Concepts</div>
+                        <div className="grid grid-cols-2 md:flex md:flex-row gap-2 sm:gap-3 md:gap-4 w-full">
+                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center hover:-translate-y-1 transition-transform">
+                                <div className="text-white font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5">{topics.length}</div>
+                                <div className="text-[10px] sm:text-xs text-text-secondary uppercase font-bold tracking-widest">Total Concepts</div>
                             </div>
-                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-3 py-3 md:px-5 md:py-4 flex-1 min-w-[110px] text-center hover:-translate-y-1 transition-transform">
-                                <div className="text-white font-black text-2xl md:text-3xl leading-none mb-1.5">{topics.filter(t => (t.accuracy || 0) >= 90).length}</div>
-                                <div className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">Concepts Mastered</div>
+                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center hover:-translate-y-1 transition-transform">
+                                <div className="text-white font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5">{topics.filter(t => (t.accuracy || 0) >= 90).length}</div>
+                                <div className="text-[10px] sm:text-xs text-text-secondary uppercase font-bold tracking-widest">Mastered</div>
                             </div>
-                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-3 py-3 md:px-5 md:py-4 flex-1 min-w-[110px] text-center hover:-translate-y-1 transition-transform relative overflow-hidden">
-                                <div className="absolute inset-0 bg-white/5" style={{ width: `${averageTopicMastery}%` }}></div>
-                                <div className="text-white font-black text-2xl md:text-3xl leading-none mb-1.5 relative z-10">{averageTopicMastery}%</div>
-                                <div className="text-[10px] text-text-secondary uppercase font-bold tracking-widest relative z-10">Avg Topic Mastery</div>
+                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center hover:-translate-y-1 transition-transform relative overflow-hidden">
+                                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-primary/20 to-orange-500/20 border-r-2 border-orange-500/50 transition-all duration-1000" style={{ width: `${averageTopicMastery}%` }}></div>
+                                <div className="text-white font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5 relative z-10">{averageTopicMastery}%</div>
+                                <div className="text-[10px] sm:text-xs text-text-secondary uppercase font-bold tracking-widest relative z-10">Avg Mastery</div>
                             </div>
-                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-3 py-3 md:px-5 md:py-4 flex-1 min-w-[110px] text-center hover:-translate-y-1 transition-transform relative overflow-hidden group/accuracy">
-                                <div className="absolute inset-0 bg-brand-primary/10" style={{ width: `${chapter?.accuracy || 0}%` }}></div>
-                                <div className="text-brand-primary font-black text-2xl md:text-3xl leading-none mb-1.5 relative z-10">{Math.round(chapter?.accuracy || 0)}%</div>
-                                <div className="text-[10px] text-text-secondary uppercase font-bold tracking-widest relative z-10">Chapter Level Mastery</div>
+                            <div className="bg-black/20 backdrop-blur-sm border border-white/5 rounded-xl px-2 py-3 md:px-5 md:py-4 flex-1 min-w-0 text-center hover:-translate-y-1 transition-transform relative overflow-hidden group/accuracy">
+                                <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-primary/20 to-orange-500/20 border-r-2 border-orange-500/50 transition-all duration-1000" style={{ width: `${chapter?.accuracy || 0}%` }}></div>
+                                <div className="text-brand-primary font-black text-xl sm:text-2xl md:text-3xl leading-none mb-1.5 relative z-10">{Math.round(chapter?.accuracy || 0)}%</div>
+                                <div className="text-[10px] sm:text-xs text-text-secondary uppercase font-bold tracking-widest relative z-10">Chap Mastery</div>
                             </div>
                         </div>
                     </div>
@@ -161,37 +158,37 @@ export default function ChapterDetailView({
                 {/* Topics / Concepts List */}
                 <Card variant="default" className="mb-10 p-6 md:p-8 flex flex-col relative overflow-hidden group">
                     <div className="mb-6">
-                        <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-2 mb-1"><Sword className="w-6 h-6 text-brand-primary fill-brand-primary"/> Warm Up Topics</h3>
-                        <p className="text-sm text-text-secondary font-bold">Warm up mode will be available till you score 90% mastery at each topic level.</p>
+                        <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-2 mb-1"><Target className="w-6 h-6 text-brand-primary"/> Concept Training Grounds</h3>
+                        <p className="text-sm text-text-secondary font-bold">Master your foundational skills here. Reach 90% accuracy in these trials to prove your combat readiness.</p>
                     </div>
                     <div className="grid grid-cols-1 gap-4 relative z-10">
                         {topics.length > 0 ? topics.map((topic, index) => (
                             <Card variant="interactive" key={topic.id} onClick={() => onStartQuiz(topic, topics[index + 1] || null)} className="w-full p-5 flex flex-col group/topic gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-app">
-                                <div className="flex flex-row items-start justify-between w-full">
-                                    <div className="flex-1 pr-4">
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <div className="shrink-0 w-8 h-8 rounded-lg bg-brand-primary/10 text-brand-primary font-black flex items-center justify-center text-sm border border-brand-primary/30 shadow-inner">
+                                <div className="flex flex-row items-start justify-between w-full gap-2">
+                                    <div className="flex-1 min-w-0 pr-2 sm:pr-4">
+                                        <div className="flex items-start sm:items-center gap-2 sm:gap-3 mb-1">
+                                            <div className="shrink-0 w-6 h-6 sm:w-8 sm:h-8 mt-0.5 sm:mt-0 rounded-md sm:rounded-lg bg-brand-primary/10 text-brand-primary font-black flex items-center justify-center text-xs sm:text-sm border border-brand-primary/30 shadow-inner">
                                                 {index + 1}
                                             </div>
-                                            <h4 className="font-black text-lg text-white group-hover/topic:text-brand-primary transition-colors leading-tight">
+                                            <h4 className="font-black text-base sm:text-lg text-white group-hover/topic:text-brand-primary transition-colors leading-tight break-words">
                                                 {topic.title || 'Concept ' + topic.id}
                                             </h4>
                                         </div>
                                         {secondaryLangCode && topic.title_translations && (
-                                            <span className="text-sm font-bold text-text-secondary mt-0.5 block pl-11">
+                                            <span className="text-xs sm:text-sm font-bold text-text-secondary mt-0.5 block pl-8 sm:pl-11">
                                                 {typeof topic.title_translations === 'string' 
                                                     ? (JSON.parse(topic.title_translations)[secondaryLangCode] || JSON.parse(topic.title_translations).hi)
                                                     : (topic.title_translations[secondaryLangCode] || topic.title_translations.hi)}
                                             </span>
                                         )}
                                         {topic.description && (
-                                            <p className="text-xs text-gray-400 mt-1.5 leading-snug line-clamp-2 pl-11">
+                                            <p className="hidden sm:block text-xs text-gray-400 mt-1.5 leading-snug line-clamp-2 pl-11">
                                                 {topic.description}
                                             </p>
                                         )}
                                     </div>
-                                    <button className="shrink-0 w-10 h-10 bg-bg-surface border-2 border-brand-primary text-brand-primary rounded-xl group-hover/topic:bg-brand-primary group-hover/topic:text-black transition-colors flex items-center justify-center">
-                                        <Play className="w-4 h-4 fill-current ml-0.5" />
+                                    <button className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-bg-surface border-2 border-brand-primary text-brand-primary rounded-lg sm:rounded-xl group-hover/topic:bg-brand-primary group-hover/topic:text-black transition-colors flex items-center justify-center mt-0.5 sm:mt-0">
+                                        <Play className="w-3 h-3 sm:w-4 sm:h-4 fill-current ml-0.5" />
                                     </button>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 pt-3 border-t border-white/5">

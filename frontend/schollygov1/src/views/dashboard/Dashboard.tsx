@@ -5,7 +5,7 @@ import { SubjectCard, User } from '../../types';
 import {
     Zap, Flame, BookOpen, ScrollText,
     Calculator, FlaskConical, Clock, AlertTriangle, Check, Calendar, Target,
-    Shield, Trophy, Hexagon, Star, ChevronRight, FolderOpen
+    Shield, Trophy, Hexagon, Star, ChevronRight, Swords
 } from 'lucide-react';
 import { getRankTitle } from '../../utils/gamification';
 import { DynamicNoticeBoard } from '../../components/ui/DynamicNoticeBoard';
@@ -21,6 +21,17 @@ interface DashboardProps {
     onNavigate: (route: string, data?: any) => void;
 }
 
+export interface UnifiedNotice {
+    id: string;
+    message: string;
+    priority: number;
+    sticky: boolean;
+    icon?: React.ReactNode | string;
+    action_cta?: string;
+    action_url?: string;
+    isBackend?: boolean;
+}
+
 export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || '', onNavigate }: DashboardProps) {
     const { user: authUser, updateUser } = useAuthStore();
     const shouldReduceMotion = useReducedMotion();
@@ -30,6 +41,14 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
     const [fetchError, setFetchError] = useState<string | null>(null);
     const [liveProfile, setLiveProfile] = useState<any>(null);
     const [activeNotice, setActiveNotice] = useState<any>(null);
+    const [dismissedNoticeIds, setDismissedNoticeIds] = useState<Set<string>>(() => {
+        try {
+            const stored = sessionStorage.getItem('dismissed_notices');
+            return stored ? new Set(JSON.parse(stored)) : new Set();
+        } catch {
+            return new Set();
+        }
+    });
 
     const getToken = () => localStorage.getItem('access_token') || localStorage.getItem('token') || sessionStorage.getItem('access_token') || sessionStorage.getItem('token') || '';
 
@@ -133,15 +152,23 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
         }
     };
 
-    const handleDismissNotice = async (noticeId: string) => {
-        try {
-            await fetch(`${apiBase}/api/v2/notices/${noticeId}/dismiss`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${getToken()}` },
-            });
-            setActiveNotice(null);
-        } catch (err) {
-            console.error('Failed to dismiss notice:', err);
+    const handleDismissNotice = async (notice: UnifiedNotice) => {
+        const newDismissed = new Set(dismissedNoticeIds);
+        newDismissed.add(notice.id);
+        setDismissedNoticeIds(newDismissed);
+        sessionStorage.setItem('dismissed_notices', JSON.stringify(Array.from(newDismissed)));
+        setCurrentNoticeIdx(0); // Safely reset index
+
+        if (notice.isBackend) {
+            try {
+                await fetch(`${apiBase}/api/v2/notices/${notice.id}/dismiss`, {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${getToken()}` },
+                });
+                setActiveNotice(null);
+            } catch (err) {
+                console.error('Failed to dismiss backend notice:', err);
+            }
         }
     };
 
@@ -171,7 +198,7 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
 
         const xpInLevel = liveProfile?.xpWithinLevel ?? currentXp;
         const targetXp = liveProfile?.next_level_xp ?? 2000;
-        const computedProgress = targetXp > 0 ? Math.min(100, Math.max(0, (xpInLevel / targetXp) * 100)) : 100;
+        const computedProgress = targetXp > 0 ? Math.min(100, Math.max(0, (xpInLevel / targetXp) * 100)) : 0;
 
         return {
             id: displayId,
@@ -208,29 +235,79 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
         return { text: "Good evening", icon: "🌙" };
     }, []);
 
-    const notices = useMemo(() => {
-        const messages = [];
+    const unifiedQueue = useMemo(() => {
+        const queue: UnifiedNotice[] = [];
 
-        messages.push(`💡 Every master was once a beginner! Don't forget to correct your mistakes by revisiting the Weakness Deck.`);
-
-        if (player.streak > 0) {
-            messages.push(`🔥 Keep the fire burning! You are on an epic ${player.streak}-day streak!`);
-        } else {
-            messages.push(`🔥 Start your streak today! Consistency is the key to mastery.`);
+        // Priority 1: Backend Notice
+        if (activeNotice && !dismissedNoticeIds.has(activeNotice.id || 'backend_notice')) {
+            queue.push({
+                id: activeNotice.id || 'backend_notice',
+                message: activeNotice.message,
+                priority: 1,
+                sticky: true,
+                icon: activeNotice.icon,
+                action_cta: activeNotice.action_cta,
+                action_url: activeNotice.action_url,
+                isBackend: true
+            });
         }
-        return messages;
-    }, [player.streak]);
+
+        // Priority 2: Onboarding
+        if (player.xp === 0 && !dismissedNoticeIds.has('local-onboarding-zero-xp')) {
+            queue.push({
+                id: 'local-onboarding-zero-xp',
+                message: `🎯 Welcome to SchollyGo! Take your first practice quiz to establish your baseline and earn your first XP.`,
+                priority: 2,
+                sticky: true
+            });
+        } else {
+            // Priority 3 / 4: Nudges and Streaks
+            if (!dismissedNoticeIds.has('local-mastery-reminder')) {
+                queue.push({
+                    id: 'local-mastery-reminder',
+                    message: `💡 Every master was once a beginner! Don't forget to correct your mistakes by revisiting the Weakness Deck.`,
+                    priority: 4,
+                    sticky: false
+                });
+            }
+
+            if (player.streak > 0) {
+                if (!dismissedNoticeIds.has('local-streak-epic')) {
+                    queue.push({
+                        id: 'local-streak-epic',
+                        message: `🔥 Keep the fire burning! You are on an epic ${player.streak}-day streak!`,
+                        priority: 3,
+                        sticky: false
+                    });
+                }
+            } else {
+                if (!dismissedNoticeIds.has('local-streak-start')) {
+                    queue.push({
+                        id: 'local-streak-start',
+                        message: `🔥 Start your streak today! Consistency is the key to mastery.`,
+                        priority: 3,
+                        sticky: false
+                    });
+                }
+            }
+        }
+
+        return queue.sort((a, b) => a.priority - b.priority);
+    }, [activeNotice, player.xp, player.streak, dismissedNoticeIds]);
 
     const [currentNoticeIdx, setCurrentNoticeIdx] = useState(0);
     const [isNoticePaused, setIsNoticePaused] = useState(false);
 
+    const safeNoticeIdx = currentNoticeIdx >= unifiedQueue.length ? 0 : currentNoticeIdx;
+    const currentNotice = unifiedQueue[safeNoticeIdx];
+
     useEffect(() => {
-        if (!notices || notices.length === 0 || isNoticePaused) return;
+        if (unifiedQueue.length === 0 || isNoticePaused || currentNotice?.sticky) return;
         const interval = setInterval(() => {
-            setCurrentNoticeIdx(prev => (prev + 1) % notices.length);
-        }, 4000); // Change every 4 seconds
+            setCurrentNoticeIdx(prev => (prev + 1) >= unifiedQueue.length ? 0 : prev + 1);
+        }, 4000); 
         return () => clearInterval(interval);
-    }, [notices, isNoticePaused]);
+    }, [unifiedQueue.length, isNoticePaused, currentNotice?.sticky]);
 
     const getIcon = (iconStr: string | undefined, size = "w-6 h-6") => {
         if (!iconStr) return <BookOpen className={size} />;
@@ -256,7 +333,7 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
                         </div>
                     ) : (
                         <div className="flex items-center gap-4">
-                            <h2 className="text-3xl md:text-4xl flex flex-wrap items-center gap-x-2 gap-y-1 tracking-tight">
+                            <h2 className="text-2xl md:text-4xl flex flex-wrap items-center gap-x-2 gap-y-1 tracking-tight">
                                 <span className="font-medium text-text-secondary">{greeting.text},</span>
                                 <span className="font-black text-brand-primary drop-shadow-sm inline-block pb-1">
                                     {player.id.split(' ')[0]}
@@ -281,34 +358,37 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
                     <div className="space-y-6">
                         {/* Primary Daily Goal */}
                         <Card variant="gamified" className="p-1">
-                            <div className="p-5 md:p-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                                <div className="flex-1">
+                            <div className="p-5 md:p-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
+                                <div className="flex-1 relative z-10">
                                     <h3 className="text-brand-primary font-bold text-sm uppercase tracking-widest mb-1">Featured Quest</h3>
                                     {player.xp === 0 ? (
                                         <>
                                             <h4 className="text-2xl font-black text-white mb-2">Welcome to the Arena! 🏟️</h4>
                                             <p className="text-sm text-text-secondary mb-4">Your learning journey begins now. Start practicing to earn your first XP and unlock ranks.</p>
+                                            <Button size="sm" variant="primary" onClick={() => onNavigate('dashboard')} className="shadow-[0_0_15px_rgba(250,204,21,0.2)]">Start Your First Quest →</Button>
                                         </>
                                     ) : (
                                         <>
                                             <h4 className="text-2xl font-black text-white mb-2">Keep Grinding!</h4>
                                             <p className="text-sm text-text-secondary mb-4">Conquer a new topic today to keep your momentum going and earn bonus XP!</p>
+                                            <Button size="sm" variant="primary" onClick={() => onNavigate('dashboard')} className="shadow-[0_0_15px_rgba(250,204,21,0.2)]">Jump into Practice →</Button>
                                         </>
                                     )}
-                                    <Button size="sm" variant="primary" onClick={() => onNavigate('dashboard')} className="shadow-[0_0_15px_rgba(250,204,21,0.2)]">Jump into Practice →</Button>
                                 </div>
-                                <div className="shrink-0 flex items-center justify-center bg-bg-surface-elevated border-2 border-brand-primary/30 p-4 rounded-2xl shadow-inner relative overflow-hidden">
+                                <div className="hidden md:flex shrink-0 items-center justify-center bg-bg-surface-elevated border-2 border-brand-primary/30 p-4 rounded-2xl shadow-inner relative overflow-hidden">
                                     <Target className="w-10 h-10 text-brand-primary animate-pulse relative z-10" />
                                 </div>
+                                {/* Mobile-only watermark icon */}
+                                <Target className="md:hidden absolute -right-4 top-1/2 -translate-y-1/2 w-32 h-32 text-brand-primary opacity-5 pointer-events-none" />
                             </div>
                         </Card>
 
                         {/* Metrics Grid */}
-                        <section aria-labelledby="metrics-heading" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <section aria-labelledby="metrics-heading" className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <h2 id="metrics-heading" className="sr-only">Performance Metrics</h2>
                             
                             {/* XP Progress Card */}
-                            <Card variant="default" className="p-5 flex flex-col justify-center gap-3">
+                            <Card variant="default" className="p-5 flex flex-col justify-center gap-3 col-span-2 md:col-span-1">
                                 <div className="flex items-center justify-between relative z-10">
                                     <h3 className="text-xs font-bold text-text-secondary uppercase tracking-widest">Rank & XP</h3>
                                     <Badge variant="rank" className="!text-[10px]">{player.rankTitle}</Badge>
@@ -372,14 +452,18 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
                 )}
 
                 {/* Dynamic Notice Board (Bottom) */}
-                {activeNotice && (
-                    <div className="mt-4">
+                {currentNotice && (
+                    <div 
+                        className="mt-4"
+                        onMouseEnter={() => setIsNoticePaused(true)}
+                        onMouseLeave={() => setIsNoticePaused(false)}
+                    >
                         <DynamicNoticeBoard 
-                            icon={activeNotice.icon}
-                            message={activeNotice.message}
-                            buttonText={activeNotice.action_cta}
-                            onClickAction={() => onNavigate(activeNotice.action_url)}
-                            onDismiss={() => handleDismissNotice(activeNotice.id)}
+                            icon={currentNotice.icon}
+                            message={currentNotice.message}
+                            buttonText={currentNotice.action_cta}
+                            onClickAction={currentNotice.action_url ? () => onNavigate(currentNotice.action_url!) : undefined}
+                            onDismiss={() => handleDismissNotice(currentNotice)}
                         />
                     </div>
                 )}
@@ -388,9 +472,9 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
                 <Card variant="default" className="mb-10 group">
                     <div className="mb-6">
                         <h3 className="text-2xl font-black text-text-primary tracking-tight flex items-center gap-2 mb-1">
-                            <FolderOpen className="w-6 h-6 text-brand-primary fill-brand-primary"/> My Arsenal
+                            <Swords className="w-6 h-6 text-brand-primary fill-brand-primary"/> My Arsenal
                         </h3>
-                        <p className="text-sm text-text-secondary font-bold">Select a subject to view its curriculum and begin practicing.</p>
+                        <p className="text-sm text-text-secondary font-bold">Displaying subjects as per your board curriculum.</p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 relative z-10">
@@ -413,8 +497,8 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
                                         }
                                     }}
                                 >
-                                    <div className="flex flex-row items-start justify-between w-full">
-                                        <div className="flex-1 pr-4">
+                                    <div className="grid grid-cols-[1fr_auto] gap-4 items-start w-full">
+                                        <div className="overflow-hidden">
                                             <div className="flex items-center gap-3 mb-1">
                                                 <div className="shrink-0 w-8 h-8 rounded-lg font-black flex items-center justify-center text-sm border shadow-inner bg-brand-primary/10 text-brand-primary border-brand-primary/30">
                                                     {getIcon(sub.icon || '', "w-4 h-4")}
@@ -424,7 +508,7 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
                                                 </h4>
                                             </div>
                                             {sub.curriculum_medium?.toLowerCase() !== 'english' && (
-                                                <span className="text-sm font-bold text-text-secondary mt-0.5 block pl-11">
+                                                <span className="text-sm font-bold text-text-secondary mt-0.5 block pl-11 truncate">
                                                     {sub.name_translations?.[sub.curriculum_medium?.toLowerCase() === 'hindi' ? 'hi' : sub.curriculum_medium?.toLowerCase().substring(0, 2) || 'hi'] || sub.name_translations?.hi}
                                                 </span>
                                             )}
@@ -454,30 +538,33 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
                                             );
                                         })()}
                                         
-                                        <div className="flex items-center gap-3 text-xs font-semibold text-text-secondary uppercase tracking-widest ml-auto">
-                                            <span>Mastery: <span className={(Number(sub.progress) || 0) >= 70 ? 'text-semantic-success' : (Number(sub.progress) || 0) >= 40 ? 'text-brand-primary' : 'text-semantic-error'}>{Math.round(Number(sub.progress) || 0)}%</span></span>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-xs font-semibold text-text-secondary uppercase tracking-widest ml-auto justify-end">
+                                            <span className="whitespace-nowrap flex items-center gap-1">
+                                                Mastery: <span className={(Number(sub.progress) || 0) >= 70 ? 'text-semantic-success' : (Number(sub.progress) || 0) >= 40 ? 'text-brand-primary' : 'text-semantic-error'}>{Math.round(Number(sub.progress) || 0)}%</span>
+                                            </span>
                                             
                                             {sub.total_chapters !== undefined && sub.total_chapters > 0 && (
-                                                <>
-                                                    <span>•</span>
+                                                <span className="hidden sm:flex whitespace-nowrap items-center gap-2">
+                                                    <span className="text-border-subtle">•</span>
                                                     <span>Chapters: {sub.chapters_completed} / {sub.total_chapters}</span>
-                                                </>
+                                                </span>
                                             )}
                                             
                                             {sub.total_xp !== undefined && (
-                                                <>
-                                                    <span>•</span>
+                                                <span className="whitespace-nowrap flex items-center gap-2">
+                                                    <span className="text-border-subtle">•</span>
                                                     <span className="text-brand-primary font-black drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]">{sub.total_xp} XP</span>
-                                                </>
+                                                </span>
                                             )}
                                         </div>
                                     </div>
                                 </Card>
                             ))
                         ) : (
-                            <div className="col-span-1 text-center text-text-secondary py-10 bg-bg-surface rounded-[2rem] border-2 border-border-subtle/50 border-dashed">
-                                <p className="font-bold">No subjects unlocked yet.</p>
-                                <button onClick={() => onNavigate('profile')} className="mt-4 px-6 py-2.5 bg-bg-surface-elevated border-2 border-border-subtle rounded-xl hover:border-brand-primary transition-colors text-sm font-bold text-text-primary shadow-md active:scale-95">Go to Profile Settings</button>
+                            <div className="col-span-1 flex flex-col items-center justify-center text-center text-text-secondary py-12 px-6 md:px-10 bg-bg-surface rounded-[2rem] border-2 border-border-subtle/50 border-dashed">
+                                <BookOpen className="w-12 h-12 text-border-subtle mb-4" />
+                                <h4 className="text-xl font-black text-text-primary tracking-tight mb-2">Coming Soon!</h4>
+                                <p className="font-bold text-sm max-w-sm">We are preparing the curriculum. Check back later to start your journey.</p>
                             </div>
                         )}
                     </div>

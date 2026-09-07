@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: '/app/',
+    base: '/',
     plugins: [
       react(),
       tailwindcss(),
@@ -21,8 +21,8 @@ export default defineConfig(() => {
             theme_color: '#ffffff',
             background_color: '#ffffff',
             display: 'standalone',
-            start_url: '/app/',
-            scope: '/app/',
+            start_url: '/',
+            scope: '/',
             icons: [
               {
                 src: 'favicon.svg',
@@ -51,22 +51,7 @@ export default defineConfig(() => {
     },
     build: {
       rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('/react/') || id.includes('/react-dom/')) {
-                return 'react-vendor';
-              }
-              if (id.includes('/motion/')) {
-                return 'motion-vendor';
-              }
-              if (id.includes('/lucide-react/')) {
-                return 'lucide-vendor';
-              }
-              return 'vendor';
-            }
-          }
-        }
+        // Let Vite handle chunking automatically to prevent circular dependency errors
       }
     },
     server: {

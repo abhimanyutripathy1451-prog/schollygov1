@@ -38,8 +38,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={`w-full ${className}`}>
         {label && (
-          <label htmlFor={inputId} className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block">
-            {label}
+          <label htmlFor={inputId} className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block flex items-center">
+            {label.includes('*') ? (
+              <>
+                {label.replace('*', '').trim()}
+                <span className="text-semantic-error ml-1 font-bold text-sm leading-none">*</span>
+              </>
+            ) : label}
           </label>
         )}
         
