@@ -13,7 +13,7 @@ export default defineConfig(() => {
       ...(process.env.TEST_MODE === 'true' ? [] : [
         VitePWA({
           registerType: 'autoUpdate',
-          includeAssets: ['favicon.svg', 'logo-192.png', 'logo-512.png'],
+          includeAssets: ['logo-192.png', 'logo-512.png'],
           manifest: {
             name: 'SchollyGo',
             short_name: 'SchollyGo',
