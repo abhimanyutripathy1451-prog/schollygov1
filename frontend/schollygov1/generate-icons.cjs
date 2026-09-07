@@ -2,23 +2,17 @@ const sharp = require('sharp');
 const fs = require('fs');
 
 async function convertIcons() {
-  const svgBuffer = fs.readFileSync('public/favicon.svg');
+  const imageBuffer = fs.readFileSync('C:/Users/abhim/.gemini/antigravity-ide/brain/ecb42651-fcb9-4f56-b667-2a56d90508a7/.user_uploaded/media_1788785768828.png');
   
-  await sharp(svgBuffer)
-    .resize(192, 192, {
-      fit: 'contain',
-      background: { r: 10, g: 15, b: 28, alpha: 1 } // Matches bg-app color
-    })
+  await sharp(imageBuffer)
+    .resize(192, 192)
     .png()
     .toFile('public/logo-192.png');
     
   console.log('Created logo-192.png');
     
-  await sharp(svgBuffer)
-    .resize(512, 512, {
-      fit: 'contain',
-      background: { r: 10, g: 15, b: 28, alpha: 1 }
-    })
+  await sharp(imageBuffer)
+    .resize(512, 512)
     .png()
     .toFile('public/logo-512.png');
     
