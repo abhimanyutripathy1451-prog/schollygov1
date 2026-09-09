@@ -91,7 +91,7 @@ export default function ChapterDetailView({
     const averageTopicMastery = topics.length > 0 
         ? Math.round(topics.reduce((sum, t) => sum + (t.accuracy || 0), 0) / topics.length)
         : 0;
-    const isReady = chapterMastery >= 70;
+    const isReady = averageTopicMastery >= 70;
 
     return (
         <div className="min-h-screen bg-bg-app text-white pb-20 w-full relative z-10">

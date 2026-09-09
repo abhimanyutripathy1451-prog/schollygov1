@@ -520,7 +520,7 @@ async def update_topic_progress_python(cursor, user_id: str, topic_id: int, is_s
             last_attempted_at = NOW(),
             rolling_attempts_count = VALUES(rolling_attempts_count),
             unresolved_mistakes_count = VALUES(unresolved_mistakes_count)
-    """, (user_id, topic_id, rolling_attempts_count, new_mastery, easy_acc, med_acc, hard_acc, status, rolling_attempts_count, previous_mastery, unresolved_count))
+    """, (user_id, topic_id, 1, new_mastery, easy_acc, med_acc, hard_acc, status, rolling_attempts_count, previous_mastery, unresolved_count))
 
     # --- Trigger 4: Arena Unlock ---
     await cursor.execute("SELECT chapter_id FROM topics WHERE id = %s", (topic_id,))
@@ -617,7 +617,7 @@ async def update_chapter_progress_python(cursor, user_id: str, chapter_id: int):
             last_attempted_at = NOW(),
             rolling_attempts_count = VALUES(rolling_attempts_count),
             unresolved_mistakes_count = VALUES(unresolved_mistakes_count)
-    """, (user_id, chapter_id, rolling_attempts_count, new_mastery, status, rolling_attempts_count, previous_mastery, unresolved_count))
+    """, (user_id, chapter_id, 1, new_mastery, status, rolling_attempts_count, previous_mastery, unresolved_count))
 
 
 async def update_subject_progress_python(cursor, user_id: str, subject_id: int):

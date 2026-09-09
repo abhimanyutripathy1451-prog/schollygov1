@@ -202,7 +202,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
         const subjChapters = allSubjChapters.filter(c => c.attempts > 0);
         const totalChapters = allSubjChapters.length;
         const chaptersMastered = allSubjChapters.filter(c => c.status === 'proficient' || c.status === 'mastered').length;
-        const subjPlays = subjChapters.reduce((sum, c) => sum + (Number(c.attempts) || 0), 0);
+        const subjPlays = allSubjChapters.reduce((sum, c) => sum + (c.topics || []).reduce((tSum: number, t: any) => tSum + (Number(t.attempts) || 0), 0), 0);
         const completionPct = totalChapters > 0 ? (chaptersMastered / totalChapters) * 100 : 0;
         const timeSpent = subjChapters.reduce((sum, c) => sum + Number(c.total_time_seconds || 0), 0);
         const easyAcc = subjChapters.length > 0 ? subjChapters.reduce((sum, c) => sum + (Number(c.easy_accuracy) || 0), 0) / subjChapters.length : 0;
