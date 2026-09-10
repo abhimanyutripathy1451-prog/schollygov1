@@ -118,6 +118,7 @@ CREATE TABLE `users` (
 
 CREATE TABLE `subjects` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
   `curriculum_code` varchar(50) NOT NULL,
   `name` varchar(100) NOT NULL,
   `name_translations` json DEFAULT NULL,
@@ -127,13 +128,15 @@ CREATE TABLE `subjects` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`),
   KEY `curriculum_code` (`curriculum_code`),
   CONSTRAINT `subjects_ibfk_1` FOREIGN KEY (`curriculum_code`) REFERENCES `curriculums` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `chapters` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `subject_id` int NOT NULL,
+  `code` varchar(100) NOT NULL,
+  `subject_code` varchar(50) NOT NULL,
   `module_name` varchar(100) NOT NULL,
   `module_translations` json DEFAULT NULL,
   `title` varchar(200) NOT NULL,
@@ -144,27 +147,29 @@ CREATE TABLE `chapters` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `subject_id` (`subject_id`),
-  CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE
+  UNIQUE KEY `code` (`code`),
+  KEY `subject_code` (`subject_code`),
+  CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`subject_code`) REFERENCES `subjects` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `user_subject_progress` (
   `user_id` varchar(36) NOT NULL,
-  `subject_id` int NOT NULL,
+  `subject_code` varchar(50) NOT NULL,
   `mastery_percentage` decimal(5,2) DEFAULT '0.00',
   `previous_mastery_percentage` decimal(5,2) DEFAULT '0.00',
   `chapters_completed` int DEFAULT '0',
   `total_chapters` int DEFAULT '0',
   `last_attempted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`user_id`,`subject_id`),
-  KEY `subject_id` (`subject_id`),
+  PRIMARY KEY (`user_id`,`subject_code`),
+  KEY `subject_code` (`subject_code`),
   CONSTRAINT `user_subject_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `user_subject_progress_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE
+  CONSTRAINT `user_subject_progress_ibfk_2` FOREIGN KEY (`subject_code`) REFERENCES `subjects` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `topics` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `chapter_id` int NOT NULL,
+  `code` varchar(100) NOT NULL,
+  `chapter_code` varchar(100) NOT NULL,
   `title` varchar(200) NOT NULL,
   `title_translations` json DEFAULT NULL,
   `description` text,
@@ -176,13 +181,14 @@ CREATE TABLE `topics` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `chapter_id` (`chapter_id`),
-  CONSTRAINT `topics_ibfk_1` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`id`) ON DELETE CASCADE
+  UNIQUE KEY `code` (`code`),
+  KEY `chapter_code` (`chapter_code`),
+  CONSTRAINT `topics_ibfk_1` FOREIGN KEY (`chapter_code`) REFERENCES `chapters` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `user_chapter_progress` (
   `user_id` varchar(36) NOT NULL,
-  `chapter_id` int NOT NULL,
+  `chapter_code` varchar(100) NOT NULL,
   `status` enum('locked','untested','calibrating','active') DEFAULT 'untested',
   `mastery_percentage` decimal(5,2) DEFAULT '0.00',
   `lifetime_attempts` int DEFAULT '0',
@@ -190,17 +196,18 @@ CREATE TABLE `user_chapter_progress` (
   `rolling_attempts_count` int DEFAULT '0',
   `previous_mastery_percentage` decimal(5,2) DEFAULT '0.00',
   `unresolved_mistakes_count` int DEFAULT '0',
-  PRIMARY KEY (`user_id`,`chapter_id`),
-  KEY `chapter_id` (`chapter_id`),
+  PRIMARY KEY (`user_id`,`chapter_code`),
+  KEY `chapter_code` (`chapter_code`),
   KEY `idx_last_attempted` (`last_attempted_at`),
   CONSTRAINT `user_chapter_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `user_chapter_progress_ibfk_2` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`id`) ON DELETE CASCADE
+  CONSTRAINT `user_chapter_progress_ibfk_2` FOREIGN KEY (`chapter_code`) REFERENCES `chapters` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `quiz_questions` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `chapter_id` int NOT NULL,
-  `topic_id` int NOT NULL,
+  `code` varchar(100) NOT NULL,
+  `chapter_code` varchar(100) NOT NULL,
+  `topic_code` varchar(100) NOT NULL,
   `base_xp` int NOT NULL DEFAULT '10',
   `difficulty` enum('easy','medium','hard') NOT NULL DEFAULT 'medium',
   `difficulty_weight` decimal(5,2) DEFAULT NULL,
@@ -226,16 +233,17 @@ CREATE TABLE `quiz_questions` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `chapter_id` (`chapter_id`),
-  KEY `quiz_questions_ibfk_2` (`topic_id`),
-  CONSTRAINT `quiz_questions_ibfk_1` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `quiz_questions_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE CASCADE,
+  UNIQUE KEY `code` (`code`),
+  KEY `chapter_code` (`chapter_code`),
+  KEY `quiz_questions_ibfk_2` (`topic_code`),
+  CONSTRAINT `quiz_questions_ibfk_1` FOREIGN KEY (`chapter_code`) REFERENCES `chapters` (`code`) ON DELETE CASCADE,
+  CONSTRAINT `quiz_questions_ibfk_2` FOREIGN KEY (`topic_code`) REFERENCES `topics` (`code`) ON DELETE CASCADE,
   CONSTRAINT `quiz_questions_chk_1` CHECK ((((`question_type` = _utf8mb4'true_false') and ((`option_0` is not null) or (`option_0_image_url` is not null)) and ((`option_1` is not null) or (`option_1_image_url` is not null))) or ((`question_type` in (_utf8mb4'mcq',_utf8mb4'msq')) and ((`option_0` is not null) or (`option_0_image_url` is not null)) and ((`option_1` is not null) or (`option_1_image_url` is not null)) and ((`option_2` is not null) or (`option_2_image_url` is not null)) and ((`option_3` is not null) or (`option_3_image_url` is not null)))))
 ) ENGINE=InnoDB AUTO_INCREMENT=136 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `user_topic_progress` (
   `user_id` varchar(36) NOT NULL,
-  `topic_id` int NOT NULL,
+  `topic_code` varchar(100) NOT NULL,
   `status` enum('locked','untested','calibrating','active') DEFAULT 'untested',
   `mastery_percentage` decimal(5,2) DEFAULT '0.00',
   `easy_accuracy` decimal(5,2) DEFAULT '0.00',
@@ -246,32 +254,32 @@ CREATE TABLE `user_topic_progress` (
   `rolling_attempts_count` int DEFAULT '0',
   `previous_mastery_percentage` decimal(5,2) DEFAULT '0.00',
   `unresolved_mistakes_count` int DEFAULT '0',
-  PRIMARY KEY (`user_id`,`topic_id`),
-  KEY `topic_id` (`topic_id`),
+  PRIMARY KEY (`user_id`,`topic_code`),
+  KEY `topic_code` (`topic_code`),
   KEY `idx_last_attempted` (`last_attempted_at`),
   CONSTRAINT `user_topic_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `user_topic_progress_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE CASCADE
+  CONSTRAINT `user_topic_progress_ibfk_2` FOREIGN KEY (`topic_code`) REFERENCES `topics` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `quiz_attempts` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` varchar(36) NOT NULL,
-  `chapter_id` int NOT NULL,
+  `chapter_code` varchar(100) NOT NULL,
   `difficulty_chosen` enum('easy','medium','hard','adaptive') NOT NULL,
   `score` int NOT NULL,
   `total_questions` int NOT NULL,
   `time_taken_seconds` int DEFAULT '0',
   `xp_earned` int NOT NULL,
   `attempted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `topic_id` int DEFAULT NULL,
+  `topic_code` varchar(100) DEFAULT NULL,
   `accuracy` decimal(5,2) DEFAULT '0.00',
   `idempotency_key` varchar(36) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_idempotency` (`idempotency_key`),
   KEY `user_id` (`user_id`),
-  KEY `chapter_id` (`chapter_id`),
-  KEY `fk_qa_topic` (`topic_id`),
-  CONSTRAINT `fk_qa_topic` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE CASCADE,
+  KEY `chapter_code` (`chapter_code`),
+  KEY `fk_qa_topic` (`topic_code`),
+  CONSTRAINT `fk_qa_topic` FOREIGN KEY (`topic_code`) REFERENCES `topics` (`code`) ON DELETE CASCADE,
   CONSTRAINT `quiz_attempts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -323,22 +331,22 @@ CREATE TABLE `question_reports` (
 CREATE TABLE `question_attempt_logs` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` varchar(36) NOT NULL,
-  `topic_id` int NOT NULL,
-  `chapter_id` int NOT NULL,
+  `topic_code` varchar(100) NOT NULL,
+  `chapter_code` varchar(100) NOT NULL,
   `question_id` int NOT NULL,
   `difficulty` enum('easy','medium','hard','adaptive') NOT NULL,
   `is_correct` tinyint DEFAULT '0',
   `attempted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `quiz_mode` enum('sandbox','adaptive') DEFAULT 'adaptive',
   PRIMARY KEY (`id`),
-  KEY `topic_id` (`topic_id`),
-  KEY `chapter_id` (`chapter_id`),
+  KEY `topic_code` (`topic_code`),
+  KEY `chapter_code` (`chapter_code`),
   KEY `question_id` (`question_id`),
-  KEY `idx_rolling_chapter` (`user_id`,`chapter_id`,`quiz_mode`,`id` DESC),
-  KEY `idx_rolling_topic` (`user_id`,`topic_id`,`id` DESC),
+  KEY `idx_rolling_chapter` (`user_id`,`chapter_code`,`quiz_mode`,`id` DESC),
+  KEY `idx_rolling_topic` (`user_id`,`topic_code`,`id` DESC),
   CONSTRAINT `question_attempt_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `question_attempt_logs_ibfk_2` FOREIGN KEY (`topic_id`) REFERENCES `topics` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `question_attempt_logs_ibfk_3` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `question_attempt_logs_ibfk_2` FOREIGN KEY (`topic_code`) REFERENCES `topics` (`code`) ON DELETE CASCADE,
+  CONSTRAINT `question_attempt_logs_ibfk_3` FOREIGN KEY (`chapter_code`) REFERENCES `chapters` (`code`) ON DELETE CASCADE,
   CONSTRAINT `question_attempt_logs_ibfk_4` FOREIGN KEY (`question_id`) REFERENCES `quiz_questions` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

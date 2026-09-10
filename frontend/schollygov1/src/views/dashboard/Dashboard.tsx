@@ -107,7 +107,7 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
             setSubjects(data.map((s) => {
                 const translations = typeof s.name_translations === 'string' ? JSON.parse(s.name_translations) : (s.name_translations || {});
                 return {
-                    id: s.subject_id || s.id,
+                    id: s.subject_code || s.id,
                     name: s.name || translations.en || 'Subject',
                     name_translations: translations,
                     icon: s.icon_class,

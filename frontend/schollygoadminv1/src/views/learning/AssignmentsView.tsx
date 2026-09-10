@@ -8,7 +8,7 @@ interface Assignment {
     icon_class: string;
     xp_reward: number;
     target_total: number;
-    chapter_id?: number | null;
+    chapter_code?: number | null;
     difficulty: 'easy' | 'medium' | 'hard';
     due_date: string | null;
     current_progress: number;
@@ -19,7 +19,7 @@ interface AssignmentsViewProps {
     apiBase?: string;
     userSession?: any;
     onNavigate: (route: string) => void;
-    onStartQuiz?: (chapterId: number, difficulty: 'easy' | 'medium' | 'hard', type: 'practice' | 'assignment') => void;
+    onStartQuiz?: (chapterCode: string, difficulty: 'easy' | 'medium' | 'hard', type: 'practice' | 'assignment') => void;
 }
 
 export default function AssignmentsView({ apiBase = import.meta.env.VITE_API_URL || '', userSession, onNavigate, onStartQuiz }: AssignmentsViewProps) {
@@ -167,7 +167,7 @@ export default function AssignmentsView({ apiBase = import.meta.env.VITE_API_URL
     );
 }
 
-const AssignmentCard: React.FC<{ assignment: Assignment; onProgressClick?: (id: number) => void; onStartQuiz?: (chapterId: number, difficulty: 'easy' | 'medium' | 'hard', type: 'practice' | 'assignment') => void }> = ({ assignment, onProgressClick, onStartQuiz }) => {
+const AssignmentCard: React.FC<{ assignment: Assignment; onProgressClick?: (id: number) => void; onStartQuiz?: (chapterCode: string, difficulty: 'easy' | 'medium' | 'hard', type: 'practice' | 'assignment') => void }> = ({ assignment, onProgressClick, onStartQuiz }) => {
     const renderIcon = () => {
         if (assignment.is_completed) return <CheckCircle2 className="w-6 h-6 text-success-green" />;
         if (assignment.icon_class && assignment.icon_class.includes('ph-')) {
@@ -179,8 +179,8 @@ const AssignmentCard: React.FC<{ assignment: Assignment; onProgressClick?: (id: 
     return (
         <motion.div 
             onClick={() => {
-                if (assignment.chapter_id != null && onStartQuiz && !assignment.is_completed) {
-                    onStartQuiz(assignment.chapter_id, assignment.difficulty || 'medium', 'assignment');
+                if (assignment.chapter_code != null && onStartQuiz && !assignment.is_completed) {
+                    onStartQuiz(assignment.chapter_code, assignment.difficulty || 'medium', 'assignment');
                 }
             }}
             whileHover={!assignment.is_completed ? { y: -2 } : {}}
@@ -220,11 +220,11 @@ const AssignmentCard: React.FC<{ assignment: Assignment; onProgressClick?: (id: 
                     )}
                 </div>
                 <div className="flex gap-2">
-                    {assignment.chapter_id != null && onStartQuiz && (
+                    {assignment.chapter_code != null && onStartQuiz && (
                         <button 
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onStartQuiz(assignment.chapter_id!, assignment.difficulty || 'medium', 'assignment');
+                                onStartQuiz(assignment.chapter_code!, assignment.difficulty || 'medium', 'assignment');
                             }}
                             className="bg-voltage-yellow/10 hover:bg-voltage-yellow/20 text-voltage-yellow px-4 py-2 rounded-xl border border-voltage-yellow/30 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1 transition-colors active:scale-95"
                         >

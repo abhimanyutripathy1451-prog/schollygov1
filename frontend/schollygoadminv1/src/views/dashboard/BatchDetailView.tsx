@@ -10,7 +10,7 @@ interface Batch {
 
 interface BatchDetailViewProps {
     batch: Batch | null;
-    onNavigate: (route: string) => void;
+    onNavigate: (route: string, data?: any) => void;
 }
 
 // Mock mapping of subjects, chapters, and enrollments

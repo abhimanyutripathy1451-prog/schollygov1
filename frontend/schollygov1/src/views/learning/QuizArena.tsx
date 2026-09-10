@@ -346,8 +346,8 @@ export default function QuizArena({
                 },
                 body: JSON.stringify({
                     idempotency_key: idempotencyKey,
-                    chapter_id: chapter?.id || -1,
-                    topic_id: topic ? topic.id : -1,
+                    chapter_code: chapter?.id || -1,
+                    topic_code: topic ? topic.id : -1,
                     is_topic_quiz: !!topic,
                     difficulty_chosen: selectedDifficulty,
                     score: calculatedScore,

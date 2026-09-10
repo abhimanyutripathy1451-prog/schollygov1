@@ -85,8 +85,8 @@ export default function App() {
     }
 
     if (targetRoute.startsWith('subject_')) {
-      const subjectId = targetRoute.split('_')[1];
-      setSelectedSubject(subjectId);
+      const subjectCode = targetRoute.split('_')[1];
+      setSelectedSubject(subjectCode);
       setCurrentRoute('chapterview');
       setIsMobileMenuOpen(false);
       return;

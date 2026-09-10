@@ -9,7 +9,7 @@ interface AppState {
     setTheme: (theme: 'dark' | 'light') => void;
     toggleTheme: () => void;
     setChaptersCache: (subject: string, chapters: any[]) => void;
-    updateChapterInCache: (subject: string, chapterId: number, data: Partial<any>) => void;
+    updateChapterInCache: (subject: string, chapterCode: string, data: Partial<any>) => void;
     setSelectedSubject: (subject: string) => void;
     setSelectedChapter: (chapter: any) => void;
 }
@@ -44,7 +44,7 @@ export const useAppStore = create<AppState>((set) => ({
         }
     })),
 
-    updateChapterInCache: (subject, chapterId, data) => set((state) => {
+    updateChapterInCache: (subject, chapterCode, data) => set((state) => {
         const cache = state.chaptersCache[subject];
         if (!cache) return state;
         
@@ -52,7 +52,7 @@ export const useAppStore = create<AppState>((set) => ({
             chaptersCache: {
                 ...state.chaptersCache,
                 [subject]: cache.map((ch) => 
-                    ch.id === chapterId ? { ...ch, ...data } : ch
+                    ch.id === chapterCode ? { ...ch, ...data } : ch
                 )
             }
         };

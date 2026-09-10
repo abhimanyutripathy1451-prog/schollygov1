@@ -225,7 +225,7 @@ export default function QuizArena({
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    chapter_id: chapter.id,
+                    chapter_code: chapter.id,
                     difficulty_chosen: selectedDifficulty,
                     score: score + (selectedOptionIndex === currentQuestion?.ans ? 1 : 0), // handle latest question score since state update might be queued
                     total_questions: activeQuestions.length,

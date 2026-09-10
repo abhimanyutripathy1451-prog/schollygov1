@@ -158,7 +158,7 @@ export default function ChapterView({
             const parsedSubjects = data.map((s: any) => {
                 const trans = typeof s.name_translations === 'string' ? JSON.parse(s.name_translations) : (s.name_translations || {});
                 return {
-                    id: s.subject_id || s.id,
+                    id: s.subject_code || s.id,
                     name: s.name || trans.en || 'Subject',
                     name_translations: trans,
                     icon: s.icon || s.icon_class || getDefaultIcon(s.name || trans.en || 'Subject'),
@@ -191,20 +191,20 @@ export default function ChapterView({
         }
     }, [selectedSubject, subjects]);
 
-    const loadChapters = async (subjectId: string | number) => {
-        if (!subjectId || subjectId === 'undefined') return;
-        if (chaptersRecord[subjectId] || loadingSubjects.current.has(subjectId)) {
+    const loadChapters = async (subjectCode: string | number) => {
+        if (!subjectCode || subjectCode === 'undefined') return;
+        if (chaptersRecord[subjectCode] || loadingSubjects.current.has(subjectCode)) {
             setIsLoading(false);
             return;
         }
 
-        loadingSubjects.current.add(subjectId);
+        loadingSubjects.current.add(subjectCode);
         setIsLoading(true);
 
         try {
             const headers = getAuthHeaders();
 
-            const chRes = await fetch(`${apiBase}/curriculum/subjects/${subjectId}/chapters`, { headers });
+            const chRes = await fetch(`${apiBase}/curriculum/subjects/${subjectCode}/chapters`, { headers });
             if (!chRes.ok) throw new Error('Failed to load chapters');
             const chaptersData = await chRes.json();
 
@@ -235,12 +235,12 @@ export default function ChapterView({
                 };
             });
 
-            setChaptersCache(subjectId.toString(), formattedChapters);
+            setChaptersCache(subjectCode.toString(), formattedChapters);
         } catch (err: any) {
             console.error("Failed to fetch chapters:", err);
             setFetchError("Unable to fetch chapters at this moment. Please try again. 😊");
         } finally {
-            loadingSubjects.current.delete(subjectId);
+            loadingSubjects.current.delete(subjectCode);
             setIsLoading(false);
         }
     };

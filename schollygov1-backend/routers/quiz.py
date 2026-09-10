@@ -96,8 +96,8 @@ class QuestionResult(BaseModel):
 
 class QuizAttemptSubmit(BaseModel):
     idempotency_key: str = Field(..., description="Unique UUID for this attempt to prevent double submission")
-    topic_id: int
-    chapter_id: int
+    topic_code: str
+    chapter_code: str
     is_topic_quiz: bool = False
     difficulty_chosen: Literal['easy', 'medium', 'hard', 'adaptive']
     score: int = Field(ge=0, description="The user's score")
@@ -193,7 +193,7 @@ def format_questions(rows):
 
 
 
-async def fetch_questions_from_db(cursor, user_id, topic_id, diff_level, limit, excluded_ids=None):
+async def fetch_questions_from_db(cursor, user_id, topic_code, diff_level, limit, excluded_ids=None):
     if limit <= 0: return []
     if excluded_ids is None:
         excluded_ids = []
@@ -215,7 +215,7 @@ async def fetch_questions_from_db(cursor, user_id, topic_id, diff_level, limit, 
             uqh.last_seen_at
         FROM quiz_questions q
         LEFT JOIN user_question_history uqh ON q.id = uqh.question_id AND uqh.user_id = %s
-        WHERE q.topic_id = %s AND q.difficulty = %s AND q.is_active = TRUE {placeholders}
+        WHERE q.topic_code = %s AND q.difficulty = %s AND q.is_active = TRUE {placeholders}
         ORDER BY 
             seen_count ASC,
             uqh.is_correct ASC,
@@ -223,14 +223,14 @@ async def fetch_questions_from_db(cursor, user_id, topic_id, diff_level, limit, 
             RAND()
         LIMIT %s
     '''
-    params = [user_id, topic_id, diff_level] + excluded_ids + [limit]
+    params = [user_id, topic_code, diff_level] + excluded_ids + [limit]
     await cursor.execute(query, tuple(params))
     return await cursor.fetchall()
 
 
-@router.get("/topics/{topic_id}/questions")
+@router.get("/topics/{topic_code}/questions")
 async def get_quiz_questions(
-    topic_id: int,
+    topic_code: str,
     difficulty: Literal['easy', 'medium', 'hard', 'adaptive'] = Query("medium"),
     user_id: str = Depends(get_current_user),
     conn: aiomysql.Connection = Depends(get_db)
@@ -242,8 +242,8 @@ async def get_quiz_questions(
         if difficulty == 'adaptive':
             # 1. Historical Accuracy Service
             await cursor.execute(
-                "SELECT COALESCE(mastery_percentage, 0) as accuracy, COALESCE(lifetime_attempts, 0) as attempts FROM user_topic_progress WHERE user_id = %s AND topic_id = %s",
-                (user_id, topic_id)
+                "SELECT COALESCE(mastery_percentage, 0) as accuracy, COALESCE(lifetime_attempts, 0) as attempts FROM user_topic_progress WHERE user_id = %s AND topic_code = %s",
+                (user_id, topic_code)
             )
             stats = await cursor.fetchone()
             if stats:
@@ -273,7 +273,7 @@ async def get_quiz_questions(
                         uqh.last_seen_at
                     FROM quiz_questions q
                     LEFT JOIN user_question_history uqh ON q.id = uqh.question_id AND uqh.user_id = %s
-                    WHERE q.topic_id = %s AND q.difficulty = %s AND q.is_active = TRUE
+                    WHERE q.topic_code = %s AND q.difficulty = %s AND q.is_active = TRUE
                     ORDER BY 
                         seen_count ASC,
                         uqh.is_correct ASC,
@@ -281,7 +281,7 @@ async def get_quiz_questions(
                         RAND()
                     LIMIT %s
                 '''
-                await cursor.execute(query, (user_id, topic_id, diff_level, limit))
+                await cursor.execute(query, (user_id, topic_code, diff_level, limit))
                 return await cursor.fetchall()
 
             # 3. Quiz Payload Fetcher with Waterfall Fill
@@ -319,11 +319,11 @@ async def get_quiz_questions(
                             q.explanation, q.tags, q.expected_time_seconds,
                             q.question_translations, q.options_translations, q.explanation_translations
                         FROM quiz_questions q
-                        WHERE q.topic_id = %s AND q.is_active = TRUE AND q.id NOT IN ({placeholders})
+                        WHERE q.topic_code = %s AND q.is_active = TRUE AND q.id NOT IN ({placeholders})
                         ORDER BY RAND()
                         LIMIT %s
                     '''
-                    params = [topic_id] + excluded_ids + [deficit]
+                    params = [topic_code] + excluded_ids + [deficit]
                     await cursor.execute(query, tuple(params))
                 else:
                     query = '''
@@ -335,11 +335,11 @@ async def get_quiz_questions(
                             q.explanation, q.tags, q.expected_time_seconds,
                             q.question_translations, q.options_translations, q.explanation_translations
                         FROM quiz_questions q
-                        WHERE q.topic_id = %s AND q.is_active = TRUE
+                        WHERE q.topic_code = %s AND q.is_active = TRUE
                         ORDER BY RAND()
                         LIMIT %s
                     '''
-                    await cursor.execute(query, (topic_id, deficit))
+                    await cursor.execute(query, (topic_code, deficit))
                 extra_q = await cursor.fetchall()
                 final_questions.extend(extra_q)
                 
@@ -363,7 +363,7 @@ async def get_quiz_questions(
                     uqh.last_seen_at
                 FROM quiz_questions q
                 LEFT JOIN user_question_history uqh ON q.id = uqh.question_id AND uqh.user_id = %s
-                WHERE q.topic_id = %s AND q.difficulty = %s AND q.is_active = TRUE
+                WHERE q.topic_code = %s AND q.difficulty = %s AND q.is_active = TRUE
                 ORDER BY 
                     seen_count ASC,
                     uqh.is_correct ASC,
@@ -371,13 +371,13 @@ async def get_quiz_questions(
                     RAND()
                 LIMIT %s
             '''
-            await cursor.execute(query, (user_id, topic_id, difficulty, quiz_size))
+            await cursor.execute(query, (user_id, topic_code, difficulty, quiz_size))
             return format_questions(await cursor.fetchall())
 
 
-@router.get("/chapters/{chapter_id}/mistakes")
+@router.get("/chapters/{chapter_code}/mistakes")
 async def get_mistakes_questions(
-    chapter_id: int,
+    chapter_code: str,
     user_id: str = Depends(get_current_user),
     conn: aiomysql.Connection = Depends(get_db)
 ):
@@ -396,12 +396,12 @@ async def get_mistakes_questions(
                 uqh.last_seen_at
             FROM quiz_questions q
             JOIN user_question_history uqh ON q.id = uqh.question_id
-            JOIN topics t ON q.topic_id = t.id
-            WHERE uqh.user_id = %s AND t.chapter_id = %s AND uqh.is_correct = FALSE AND q.is_active = TRUE
+            JOIN topics t ON q.topic_code = t.id
+            WHERE uqh.user_id = %s AND t.chapter_code = %s AND uqh.is_correct = FALSE AND q.is_active = TRUE
             ORDER BY uqh.last_seen_at ASC, RAND()
             LIMIT 10
         """
-        await cursor.execute(query, (user_id, chapter_id))
+        await cursor.execute(query, (user_id, chapter_code))
         questions = await cursor.fetchall()
 
         return format_questions(questions)
@@ -437,15 +437,15 @@ def allocate_adaptive_slots(topic_scores: dict, starved_topics: list, old_topics
             
     return allocations
 
-async def update_topic_progress_python(cursor, user_id: str, topic_id: int, is_sandbox: bool):
-    await cursor.execute("SELECT mastery_percentage FROM user_topic_progress WHERE user_id = %s AND topic_id = %s", (user_id, topic_id))
+async def update_topic_progress_python(cursor, user_id: str, topic_code: str, is_sandbox: bool):
+    await cursor.execute("SELECT mastery_percentage FROM user_topic_progress WHERE user_id = %s AND topic_code = %s", (user_id, topic_code))
     existing = await cursor.fetchone()
     previous_mastery = float(existing['mastery_percentage']) if existing and existing['mastery_percentage'] is not None else 0.0
 
     if previous_mastery <= 40.0:
-        filter_sql = "WHERE user_id = %s AND topic_id = %s"
+        filter_sql = "WHERE user_id = %s AND topic_code = %s"
     else:
-        filter_sql = "WHERE user_id = %s AND topic_id = %s AND quiz_mode = 'adaptive'"
+        filter_sql = "WHERE user_id = %s AND topic_code = %s AND quiz_mode = 'adaptive'"
 
     await cursor.execute(f"""
         SELECT 
@@ -463,7 +463,7 @@ async def update_topic_progress_python(cursor, user_id: str, topic_id: int, is_s
             ORDER BY id DESC LIMIT 30
         ) qal
         JOIN quiz_questions q ON qal.question_id = q.id
-    """, (user_id, topic_id))
+    """, (user_id, topic_code))
     stats = await cursor.fetchone()
     if not stats or not stats['total_qs']:
         return
@@ -498,14 +498,14 @@ async def update_topic_progress_python(cursor, user_id: str, topic_id: int, is_s
         SELECT COUNT(*) as unresolved 
         FROM user_mistake_lifecycle uml
         JOIN quiz_questions q ON uml.question_id = q.id
-        WHERE uml.user_id = %s AND q.topic_id = %s AND uml.status = 'pending'
-    """, (user_id, topic_id))
+        WHERE uml.user_id = %s AND q.topic_code = %s AND uml.status = 'pending'
+    """, (user_id, topic_code))
     mistakes_res = await cursor.fetchone()
     unresolved_count = mistakes_res['unresolved'] if mistakes_res else 0
     
     await cursor.execute("""
         INSERT INTO user_topic_progress (
-            user_id, topic_id, lifetime_attempts, mastery_percentage, easy_accuracy, medium_accuracy, hard_accuracy, 
+            user_id, topic_code, lifetime_attempts, mastery_percentage, easy_accuracy, medium_accuracy, hard_accuracy, 
             status, last_attempted_at, rolling_attempts_count, previous_mastery_percentage, unresolved_mistakes_count
         )
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s, %s, %s)
@@ -520,25 +520,25 @@ async def update_topic_progress_python(cursor, user_id: str, topic_id: int, is_s
             last_attempted_at = NOW(),
             rolling_attempts_count = VALUES(rolling_attempts_count),
             unresolved_mistakes_count = VALUES(unresolved_mistakes_count)
-    """, (user_id, topic_id, 1, new_mastery, easy_acc, med_acc, hard_acc, status, rolling_attempts_count, previous_mastery, unresolved_count))
+    """, (user_id, topic_code, 1, new_mastery, easy_acc, med_acc, hard_acc, status, rolling_attempts_count, previous_mastery, unresolved_count))
 
     # --- Trigger 4: Arena Unlock ---
-    await cursor.execute("SELECT chapter_id FROM topics WHERE id = %s", (topic_id,))
+    await cursor.execute("SELECT chapter_code FROM topics WHERE id = %s", (topic_code,))
     topic_res = await cursor.fetchone()
     if topic_res:
-        chapter_id = topic_res['chapter_id']
+        chapter_code = topic_res['chapter_code']
         await cursor.execute("""
             SELECT AVG(utp.mastery_percentage) as avg_topic_mastery
             FROM user_topic_progress utp
-            JOIN topics t ON utp.topic_id = t.id
-            WHERE utp.user_id = %s AND t.chapter_id = %s
-        """, (user_id, chapter_id))
+            JOIN topics t ON utp.topic_code = t.id
+            WHERE utp.user_id = %s AND t.chapter_code = %s
+        """, (user_id, chapter_code))
         avg_res = await cursor.fetchone()
         avg_topic_mastery = float(avg_res['avg_topic_mastery']) if avg_res and avg_res['avg_topic_mastery'] else 0.0
         
         if avg_topic_mastery >= 70.0:
             import uuid
-            action_url = f"chapter/{chapter_id}"
+            action_url = f"chapter/{chapter_code}"
             await cursor.execute("""
                 SELECT id FROM user_notices 
                 WHERE user_id = %s AND notice_type = 'MILESTONE' AND action_url = %s
@@ -549,7 +549,7 @@ async def update_topic_progress_python(cursor, user_id: str, topic_id: int, is_s
                     VALUES (%s, %s, 'MILESTONE', 'Chapter Challenge Unlocked! Your Topic Mastery is over 70%%. You are ready to earn maximum XP.', 'ENTER ARENA', %s)
                 """, (str(uuid.uuid4()), user_id, action_url))
 
-async def update_chapter_progress_python(cursor, user_id: str, chapter_id: int):
+async def update_chapter_progress_python(cursor, user_id: str, chapter_code: str):
     await cursor.execute("""
         SELECT 
             COUNT(*) as total_qs,
@@ -562,11 +562,11 @@ async def update_chapter_progress_python(cursor, user_id: str, chapter_id: int):
         FROM (
             SELECT question_id, is_correct 
             FROM question_attempt_logs 
-            WHERE user_id = %s AND chapter_id = %s AND quiz_mode = 'adaptive'
+            WHERE user_id = %s AND chapter_code = %s AND quiz_mode = 'adaptive'
             ORDER BY id DESC LIMIT 30
         ) qal
         JOIN quiz_questions q ON qal.question_id = q.id
-    """, (user_id, chapter_id))
+    """, (user_id, chapter_code))
     stats = await cursor.fetchone()
     if not stats or not stats['total_qs']:
         return
@@ -587,7 +587,7 @@ async def update_chapter_progress_python(cursor, user_id: str, chapter_id: int):
     med_acc = (med_score / med_qs * 100) if med_qs > 0 else 0
     hard_acc = (hard_score / hard_qs * 100) if hard_qs > 0 else 0
     
-    await cursor.execute("SELECT mastery_percentage FROM user_chapter_progress WHERE user_id = %s AND chapter_id = %s", (user_id, chapter_id))
+    await cursor.execute("SELECT mastery_percentage FROM user_chapter_progress WHERE user_id = %s AND chapter_code = %s", (user_id, chapter_code))
     existing = await cursor.fetchone()
     previous_mastery = float(existing['mastery_percentage']) if existing and existing['mastery_percentage'] is not None else 0.0
 
@@ -598,14 +598,14 @@ async def update_chapter_progress_python(cursor, user_id: str, chapter_id: int):
         SELECT COUNT(*) as unresolved 
         FROM user_mistake_lifecycle uml
         JOIN quiz_questions q ON uml.question_id = q.id
-        WHERE uml.user_id = %s AND q.chapter_id = %s AND uml.status = 'pending'
-    """, (user_id, chapter_id))
+        WHERE uml.user_id = %s AND q.chapter_code = %s AND uml.status = 'pending'
+    """, (user_id, chapter_code))
     mistakes_res = await cursor.fetchone()
     unresolved_count = mistakes_res['unresolved'] if mistakes_res else 0
     
     await cursor.execute("""
         INSERT INTO user_chapter_progress (
-            user_id, chapter_id, lifetime_attempts, mastery_percentage, 
+            user_id, chapter_code, lifetime_attempts, mastery_percentage, 
             status, last_attempted_at, rolling_attempts_count, previous_mastery_percentage, unresolved_mistakes_count
         )
         VALUES (%s, %s, %s, %s, %s, NOW(), %s, %s, %s)
@@ -617,12 +617,12 @@ async def update_chapter_progress_python(cursor, user_id: str, chapter_id: int):
             last_attempted_at = NOW(),
             rolling_attempts_count = VALUES(rolling_attempts_count),
             unresolved_mistakes_count = VALUES(unresolved_mistakes_count)
-    """, (user_id, chapter_id, 1, new_mastery, status, rolling_attempts_count, previous_mastery, unresolved_count))
+    """, (user_id, chapter_code, 1, new_mastery, status, rolling_attempts_count, previous_mastery, unresolved_count))
 
 
-async def update_subject_progress_python(cursor, user_id: str, subject_id: int):
+async def update_subject_progress_python(cursor, user_id: str, subject_code: str):
     # Total active chapters in subject
-    await cursor.execute("SELECT COUNT(*) as count FROM chapters WHERE subject_id = %s AND is_active = TRUE", (subject_id,))
+    await cursor.execute("SELECT COUNT(*) as count FROM chapters WHERE subject_code = %s AND is_active = TRUE", (subject_code,))
     total_chapters = (await cursor.fetchone())['count'] or 0
 
     if total_chapters == 0:
@@ -634,9 +634,9 @@ async def update_subject_progress_python(cursor, user_id: str, subject_id: int):
             SUM(ucp.mastery_percentage) as total_mastery,
             SUM(CASE WHEN ucp.mastery_percentage >= 75.00 AND ucp.status = 'active' THEN 1 ELSE 0 END) as chapters_completed
         FROM chapters c
-        JOIN user_chapter_progress ucp ON c.id = ucp.chapter_id
-        WHERE c.subject_id = %s AND c.is_active = TRUE AND ucp.user_id = %s AND ucp.status = 'active'
-    """, (subject_id, user_id))
+        JOIN user_chapter_progress ucp ON c.id = ucp.chapter_code
+        WHERE c.subject_code = %s AND c.is_active = TRUE AND ucp.user_id = %s AND ucp.status = 'active'
+    """, (subject_code, user_id))
     stats = await cursor.fetchone()
     
     total_mastery = float(stats['total_mastery']) if stats and stats['total_mastery'] is not None else 0.0
@@ -644,13 +644,13 @@ async def update_subject_progress_python(cursor, user_id: str, subject_id: int):
 
     new_mastery = total_mastery / total_chapters
     
-    await cursor.execute("SELECT mastery_percentage FROM user_subject_progress WHERE user_id = %s AND subject_id = %s", (user_id, subject_id))
+    await cursor.execute("SELECT mastery_percentage FROM user_subject_progress WHERE user_id = %s AND subject_code = %s", (user_id, subject_code))
     existing = await cursor.fetchone()
     previous_mastery = float(existing['mastery_percentage']) if existing and existing['mastery_percentage'] is not None else 0.0
 
     await cursor.execute("""
         INSERT INTO user_subject_progress (
-            user_id, subject_id, mastery_percentage, previous_mastery_percentage,
+            user_id, subject_code, mastery_percentage, previous_mastery_percentage,
             chapters_completed, total_chapters, last_attempted_at
         )
         VALUES (%s, %s, %s, %s, %s, %s, NOW())
@@ -660,7 +660,7 @@ async def update_subject_progress_python(cursor, user_id: str, subject_id: int):
             chapters_completed = VALUES(chapters_completed),
             total_chapters = VALUES(total_chapters),
             last_attempted_at = NOW()
-    """, (user_id, subject_id, new_mastery, previous_mastery, chapters_completed, total_chapters))
+    """, (user_id, subject_code, new_mastery, previous_mastery, chapters_completed, total_chapters))
 
 @router.post("/attempts")
 async def submit_quiz_attempt(
@@ -710,7 +710,7 @@ async def submit_quiz_attempt(
                     weighted_base_xp += float(q['base_xp']) * float(q['weight'])
 
             if not attempt.is_topic_quiz:
-                await cursor.execute("SELECT lifetime_attempts FROM user_chapter_progress WHERE user_id = %s AND chapter_id = %s", (user_id, attempt.chapter_id))
+                await cursor.execute("SELECT lifetime_attempts FROM user_chapter_progress WHERE user_id = %s AND chapter_code = %s", (user_id, attempt.chapter_code))
                 chap_prog = await cursor.fetchone()
                 lifetime_attempts = chap_prog['lifetime_attempts'] if chap_prog else 0
                 if lifetime_attempts > 0:
@@ -728,10 +728,10 @@ async def submit_quiz_attempt(
 
             attempt_query = """
                 INSERT INTO quiz_attempts 
-                (user_id, chapter_id, topic_id, difficulty_chosen, score, total_questions, time_taken_seconds, xp_earned, accuracy, idempotency_key)
+                (user_id, chapter_code, topic_code, difficulty_chosen, score, total_questions, time_taken_seconds, xp_earned, accuracy, idempotency_key)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            tid = attempt.topic_id if attempt.topic_id != -1 else None
+            tid = attempt.topic_code if attempt.topic_code != -1 else None
             
             # Calculate accuracy explicitly on backend (protects against weighted score inflation)
             correct_count = sum(1 for r in attempt.question_results if r.is_correct)
@@ -740,7 +740,7 @@ async def submit_quiz_attempt(
             import pymysql
             try:
                 await cursor.execute(attempt_query, (
-                    user_id, attempt.chapter_id, tid, attempt.difficulty_chosen, 
+                    user_id, attempt.chapter_code, tid, attempt.difficulty_chosen, 
                     attempt.score, attempt.total_questions, attempt.time_taken_seconds, earned_xp, calc_accuracy, attempt.idempotency_key
                 ))
             except pymysql.err.IntegrityError as e:
@@ -771,25 +771,25 @@ async def submit_quiz_attempt(
 
                 q_logs_query = """
                     INSERT INTO question_attempt_logs 
-                    (user_id, topic_id, chapter_id, question_id, difficulty, is_correct, quiz_mode)
+                    (user_id, topic_code, chapter_code, question_id, difficulty, is_correct, quiz_mode)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """
                 q_ids = [r.question_id for r in attempt.question_results]
                 if q_ids:
                     placeholders = ','.join(['%s'] * len(q_ids))
-                    await cursor.execute(f"SELECT id, topic_id FROM quiz_questions WHERE id IN ({placeholders})", tuple(q_ids))
-                    q_topic_map = {row['id']: row['topic_id'] for row in await cursor.fetchall()}
+                    await cursor.execute(f"SELECT id, topic_code FROM quiz_questions WHERE id IN ({placeholders})", tuple(q_ids))
+                    q_topic_map = {row['id']: row['topic_code'] for row in await cursor.fetchall()}
                 else:
                     q_topic_map = {}
 
                 def get_tid(q_id):
-                    t = attempt.topic_id if attempt.topic_id != -1 else None
+                    t = attempt.topic_code if attempt.topic_code != -1 else None
                     if t is None:
                         mapped = q_topic_map.get(q_id)
                         return mapped if mapped is not None else 1
                     return t
 
-                q_logs_data = [(user_id, get_tid(r.question_id), attempt.chapter_id, r.question_id, attempt.difficulty_chosen, r.is_correct, 'sandbox' if attempt.is_topic_quiz else 'adaptive') for r in attempt.question_results]
+                q_logs_data = [(user_id, get_tid(r.question_id), attempt.chapter_code, r.question_id, attempt.difficulty_chosen, r.is_correct, 'sandbox' if attempt.is_topic_quiz else 'adaptive') for r in attempt.question_results]
                 await cursor.executemany(q_logs_query, q_logs_data)
                 
                 if mistakes_data:
@@ -819,30 +819,30 @@ async def submit_quiz_attempt(
                 for r in attempt.question_results:
                     tested_topics.add(get_tid(r.question_id))
 
-            await cursor.execute("SELECT subject_id FROM chapters WHERE id = %s", (attempt.chapter_id,))
+            await cursor.execute("SELECT subject_code FROM chapters WHERE id = %s", (attempt.chapter_code,))
             subj_res = await cursor.fetchone()
-            subject_id = subj_res['subject_id'] if subj_res else None
+            subject_code = subj_res['subject_code'] if subj_res else None
 
             if attempt.is_topic_quiz:
                 # Path A: Topic Warm-Up
                 for t_id in tested_topics:
                     await update_topic_progress_python(cursor, user_id, t_id, is_sandbox=True)
-                if subject_id:
-                    await update_subject_progress_python(cursor, user_id, subject_id)
+                if subject_code:
+                    await update_subject_progress_python(cursor, user_id, subject_code)
             else:
                 # Path B: Chapter Adaptive Quiz
-                await update_chapter_progress_python(cursor, user_id, attempt.chapter_id)
+                await update_chapter_progress_python(cursor, user_id, attempt.chapter_code)
                 for t_id in tested_topics:
                     await update_topic_progress_python(cursor, user_id, t_id, is_sandbox=False)
-                if subject_id:
-                    await update_subject_progress_python(cursor, user_id, subject_id)
+                if subject_code:
+                    await update_subject_progress_python(cursor, user_id, subject_code)
 
             # Masteries
             if attempt.is_topic_quiz:
-                await cursor.execute("SELECT mastery_percentage, previous_mastery_percentage FROM user_topic_progress WHERE user_id = %s AND topic_id = %s", (user_id, attempt.topic_id))
+                await cursor.execute("SELECT mastery_percentage, previous_mastery_percentage FROM user_topic_progress WHERE user_id = %s AND topic_code = %s", (user_id, attempt.topic_code))
                 mastery_res = await cursor.fetchone()
             else:
-                await cursor.execute("SELECT mastery_percentage, previous_mastery_percentage FROM user_chapter_progress WHERE user_id = %s AND chapter_id = %s", (user_id, attempt.chapter_id))
+                await cursor.execute("SELECT mastery_percentage, previous_mastery_percentage FROM user_chapter_progress WHERE user_id = %s AND chapter_code = %s", (user_id, attempt.chapter_code))
                 mastery_res = await cursor.fetchone()
             
             if mastery_res:
@@ -860,9 +860,9 @@ async def submit_quiz_attempt(
             new_level, new_rank_title = await get_new_level(cursor, new_total_xp)
             
             new_accuracy = None
-            if attempt.topic_id != -1:
-                acc_check_query = "SELECT mastery_percentage FROM user_topic_progress WHERE user_id = %s AND topic_id = %s"
-                await cursor.execute(acc_check_query, (user_id, attempt.topic_id))
+            if attempt.topic_code != -1:
+                acc_check_query = "SELECT mastery_percentage FROM user_topic_progress WHERE user_id = %s AND topic_code = %s"
+                await cursor.execute(acc_check_query, (user_id, attempt.topic_code))
                 acc_check_res = await cursor.fetchone()
                 if acc_check_res:
                     new_accuracy = float(acc_check_res['mastery_percentage'])
@@ -883,12 +883,12 @@ async def submit_quiz_attempt(
             
             # Trigger 1: XP Decay Warning
             if not attempt.is_topic_quiz:
-                await cursor.execute("SELECT lifetime_attempts FROM user_chapter_progress WHERE user_id = %s AND chapter_id = %s", (user_id, attempt.chapter_id))
+                await cursor.execute("SELECT lifetime_attempts FROM user_chapter_progress WHERE user_id = %s AND chapter_code = %s", (user_id, attempt.chapter_code))
                 chap_prog = await cursor.fetchone()
                 lifetime_attempts = chap_prog['lifetime_attempts'] if chap_prog else 1
                 
                 if lifetime_attempts >= 3:
-                    action_url = f"chapter/{attempt.chapter_id}"
+                    action_url = f"chapter/{attempt.chapter_code}"
                     await cursor.execute("""
                         SELECT id FROM user_notices 
                         WHERE user_id = %s AND notice_type = 'WARNING' AND action_url = %s
@@ -936,9 +936,9 @@ async def submit_quiz_attempt(
             raise HTTPException(status_code=500, detail=f"Transaction failed: {str(e)}")
 
 
-@router.get("/analytics/chapters/{chapter_id}/tags")
+@router.get("/analytics/chapters/{chapter_code}/tags")
 async def get_topic_analytics(
-    chapter_id: int,
+    chapter_code: str,
     user_id: str = Depends(get_current_user),
     conn: aiomysql.Connection = Depends(get_db)
 ):
@@ -953,12 +953,12 @@ async def get_topic_analytics(
                 AVG(uqh.avg_time_spent) as avg_time_spent
             FROM user_question_history uqh
             JOIN quiz_questions q ON uqh.question_id = q.id
-            JOIN topics t ON q.topic_id = t.id
-            WHERE uqh.user_id = %s AND t.chapter_id = %s AND q.tags IS NOT NULL AND JSON_LENGTH(q.tags) > 0
+            JOIN topics t ON q.topic_code = t.id
+            WHERE uqh.user_id = %s AND t.chapter_code = %s AND q.tags IS NOT NULL AND JSON_LENGTH(q.tags) > 0
             GROUP BY topic
             ORDER BY accuracy ASC
         """
-        await cursor.execute(query, (user_id, chapter_id))
+        await cursor.execute(query, (user_id, chapter_code))
         topics = await cursor.fetchall()
         
         # Format decimal values if needed
@@ -970,9 +970,9 @@ async def get_topic_analytics(
                 
         return topics
 
-@router.get("/analytics/chapters/{chapter_id}/err")
+@router.get("/analytics/chapters/{chapter_code}/err")
 async def get_err_analytics(
-    chapter_id: int,
+    chapter_code: str,
     user_id: str = Depends(get_current_user),
     conn: aiomysql.Connection = Depends(get_db)
 ):
@@ -984,10 +984,10 @@ async def get_err_analytics(
                 SUM(CASE WHEN uml.status = 'resolved' THEN 1 ELSE 0 END) as resolved_mistakes
             FROM user_mistake_lifecycle uml
             JOIN quiz_questions q ON uml.question_id = q.id
-            JOIN topics t ON q.topic_id = t.id
-            WHERE uml.user_id = %s AND t.chapter_id = %s
+            JOIN topics t ON q.topic_code = t.id
+            WHERE uml.user_id = %s AND t.chapter_code = %s
         """
-        await cursor.execute(query, (user_id, chapter_id))
+        await cursor.execute(query, (user_id, chapter_code))
         result = await cursor.fetchone()
         
         total = result['total_mistakes'] or 0
@@ -1002,67 +1002,67 @@ async def get_err_analytics(
 
 
 
-@router.get("/chapters/{chapter_id}/questions/adaptive")
+@router.get("/chapters/{chapter_code}/questions/adaptive")
 async def get_chapter_adaptive_quiz(
-    chapter_id: int,
+    chapter_code: str,
     user_id: str = Depends(get_current_user),
     conn: aiomysql.Connection = Depends(get_db)
 ):
     """Generates a 10-question adaptive quiz using topic-level mastery allocations."""
     async with conn.cursor(aiomysql.DictCursor) as cursor:
-        await cursor.execute("SELECT id FROM topics WHERE chapter_id = %s", (chapter_id,))
+        await cursor.execute("SELECT id FROM topics WHERE chapter_code = %s", (chapter_code,))
         topics = await cursor.fetchall()
-        topic_ids = [t['id'] for t in topics]
+        topic_codes = [t['id'] for t in topics]
         
-        if not topic_ids:
+        if not topic_codes:
             return []
 
         # Find starved topics (Coverage)
         await cursor.execute('''
-            SELECT q.topic_id, COUNT(*) as freq
+            SELECT q.topic_code, COUNT(*) as freq
             FROM (
                 SELECT question_id 
                 FROM question_attempt_logs 
-                WHERE user_id = %s AND chapter_id = %s AND difficulty = 'adaptive'
+                WHERE user_id = %s AND chapter_code = %s AND difficulty = 'adaptive'
                 ORDER BY id DESC 
                 LIMIT 30
             ) last_30
             JOIN quiz_questions q ON last_30.question_id = q.id
-            GROUP BY q.topic_id
-        ''', (user_id, chapter_id))
+            GROUP BY q.topic_code
+        ''', (user_id, chapter_code))
         freq_results = await cursor.fetchall()
-        freq_map = {t: 0 for t in topic_ids}
+        freq_map = {t: 0 for t in topic_codes}
         for r in freq_results:
-            if r['topic_id'] in freq_map:
-                freq_map[r['topic_id']] = r['freq']
+            if r['topic_code'] in freq_map:
+                freq_map[r['topic_code']] = r['freq']
         starved_topics = [t for t, freq in freq_map.items() if freq < 3]
 
         # Find old topics (Spaced Repetition)
         await cursor.execute('''
-            SELECT topic_id, MAX(attempted_at) as last_attempt
+            SELECT topic_code, MAX(attempted_at) as last_attempt
             FROM quiz_attempts
-            WHERE user_id = %s AND chapter_id = %s AND topic_id IS NOT NULL
-            GROUP BY topic_id
-        ''', (user_id, chapter_id))
+            WHERE user_id = %s AND chapter_code = %s AND topic_code IS NOT NULL
+            GROUP BY topic_code
+        ''', (user_id, chapter_code))
         last_attempts = await cursor.fetchall()
         import datetime
         now = datetime.datetime.now()
         old_topics = []
-        for t in topic_ids:
-            last_dt = next((r['last_attempt'] for r in last_attempts if r['topic_id'] == t), None)
+        for t in topic_codes:
+            last_dt = next((r['last_attempt'] for r in last_attempts if r['topic_code'] == t), None)
             if not last_dt or (now - last_dt).days > 14:
                 old_topics.append(t)
 
         # Get Topic Scores
         await cursor.execute('''
-            SELECT topic_id, COALESCE(mastery_percentage, 0) as acc
+            SELECT topic_code, COALESCE(mastery_percentage, 0) as acc
             FROM user_topic_progress
-            WHERE user_id = %s AND topic_id IN ({})
-        '''.format(','.join(['%s']*len(topic_ids))), (user_id, *topic_ids))
+            WHERE user_id = %s AND topic_code IN ({})
+        '''.format(','.join(['%s']*len(topic_codes))), (user_id, *topic_codes))
         acc_results = await cursor.fetchall()
-        topic_scores = {t: 0.0 for t in topic_ids}
+        topic_scores = {t: 0.0 for t in topic_codes}
         for r in acc_results:
-            topic_scores[r['topic_id']] = float(r['acc'])
+            topic_scores[r['topic_code']] = float(r['acc'])
 
         # Allocate Slots
         allocations = allocate_adaptive_slots(topic_scores, starved_topics, old_topics)
@@ -1085,7 +1085,7 @@ async def get_chapter_adaptive_quiz(
                     q.explanation, q.tags, q.expected_time_seconds,
                     q.question_translations, q.options_translations, q.explanation_translations
                 FROM quiz_questions q
-                WHERE q.topic_id = %s AND q.difficulty = %s AND q.is_active = TRUE {placeholders}
+                WHERE q.topic_code = %s AND q.difficulty = %s AND q.is_active = TRUE {placeholders}
                 AND q.id NOT IN (
                     SELECT question_id FROM question_attempt_logs 
                     WHERE user_id = %s AND attempted_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
@@ -1111,7 +1111,7 @@ async def get_chapter_adaptive_quiz(
                     q.question_translations, q.options_translations, q.explanation_translations
                 FROM quiz_questions q
                 LEFT JOIN question_attempt_logs qal ON q.id = qal.question_id AND qal.user_id = %s
-                WHERE q.topic_id = %s AND q.is_active = TRUE {placeholders}
+                WHERE q.topic_code = %s AND q.is_active = TRUE {placeholders}
                 GROUP BY q.id
                 ORDER BY MAX(qal.attempted_at) ASC
                 LIMIT %s
@@ -1151,9 +1151,9 @@ async def get_chapter_adaptive_quiz(
                 
         # Fill remaining deficit if topics didn't have enough questions at all
         deficit = 10 - len(final_questions)
-        if deficit > 0 and topic_ids:
+        if deficit > 0 and topic_codes:
             excluded = [q['id'] for q in final_questions]
-            qs = await fetch_fallback_oldest(topic_ids[0], deficit, excluded) # just fallback on first topic, or modify query to IN (topic_ids)
+            qs = await fetch_fallback_oldest(topic_codes[0], deficit, excluded) # just fallback on first topic, or modify query to IN (topic_codes)
             final_questions.extend(qs)
             
         import random

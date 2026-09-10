@@ -1,7 +1,7 @@
 import aiomysql
 from core.database import db_instance
 
-async def calculate_rolling_mastery(user_id: str, topic_id: int, chapter_id: int):
+async def calculate_rolling_mastery(user_id: str, topic_code: str, chapter_code: str):
     WINDOW_SIZE = 30
     THRESHOLD = 10
     
@@ -14,25 +14,25 @@ async def calculate_rolling_mastery(user_id: str, topic_id: int, chapter_id: int
             topic_query = """
                 SELECT difficulty, is_correct
                 FROM question_attempt_logs
-                WHERE user_id = %s AND topic_id = %s
+                WHERE user_id = %s AND topic_code = %s
                 ORDER BY attempted_at DESC
                 LIMIT %s
             """
-            await cursor.execute(topic_query, (user_id, topic_id, WINDOW_SIZE))
+            await cursor.execute(topic_query, (user_id, topic_code, WINDOW_SIZE))
             topic_logs = await cursor.fetchall()
-            await update_entity_mastery(cursor, user_id, 'topic', topic_id, topic_logs, THRESHOLD)
+            await update_entity_mastery(cursor, user_id, 'topic', topic_code, topic_logs, THRESHOLD)
 
             # 2. Chapter Mastery
             chapter_query = """
                 SELECT difficulty, is_correct
                 FROM question_attempt_logs
-                WHERE user_id = %s AND chapter_id = %s
+                WHERE user_id = %s AND chapter_code = %s
                 ORDER BY attempted_at DESC
                 LIMIT %s
             """
-            await cursor.execute(chapter_query, (user_id, chapter_id, WINDOW_SIZE))
+            await cursor.execute(chapter_query, (user_id, chapter_code, WINDOW_SIZE))
             chapter_logs = await cursor.fetchall()
-            await update_entity_mastery(cursor, user_id, 'chapter', chapter_id, chapter_logs, THRESHOLD)
+            await update_entity_mastery(cursor, user_id, 'chapter', chapter_code, chapter_logs, THRESHOLD)
             
             await conn.commit()
 

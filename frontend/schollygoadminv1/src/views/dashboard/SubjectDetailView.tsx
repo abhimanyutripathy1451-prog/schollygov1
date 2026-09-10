@@ -39,9 +39,9 @@ export default function SubjectDetailView({ payload, onNavigate }: SubjectDetail
 
     const { batch, subject } = payload;
 
-    const toggleLock = (chapterId: number) => {
+    const toggleLock = (chapterCode: string) => {
         setChapters(prev => prev.map(ch => 
-            ch.id === chapterId ? { ...ch, isLocked: !ch.isLocked } : ch
+            ch.id === chapterCode ? { ...ch, isLocked: !ch.isLocked } : ch
         ));
     };
 

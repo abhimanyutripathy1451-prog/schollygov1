@@ -157,7 +157,7 @@ export default function ChapterView({
             const data = await res.json();
 
             const parsedSubjects = data.map((s: any) => ({
-                id: s.subject_id || s.id,
+                id: s.subject_code || s.id,
                 name: s.name || s.title,
                 hindiName: s.name_hi || '',
                 icon: s.icon || s.icon_class || getDefaultIcon(s.name || s.title)
@@ -187,20 +187,20 @@ export default function ChapterView({
         }
     }, [initialSubject, subjects]);
 
-    const loadChapters = async (subjectId: string | number) => {
-        if (!subjectId || subjectId === 'undefined') return;
-        if (chaptersRecord[subjectId] || loadingSubjects.current.has(subjectId)) {
+    const loadChapters = async (subjectCode: string | number) => {
+        if (!subjectCode || subjectCode === 'undefined') return;
+        if (chaptersRecord[subjectCode] || loadingSubjects.current.has(subjectCode)) {
             setIsLoading(false);
             return;
         }
 
-        loadingSubjects.current.add(subjectId);
+        loadingSubjects.current.add(subjectCode);
         setIsLoading(true);
 
         try {
             const headers = getAuthHeaders();
 
-            const chRes = await fetch(`${apiBase}/curriculum/subjects/${subjectId}/chapters`, { headers });
+            const chRes = await fetch(`${apiBase}/curriculum/subjects/${subjectCode}/chapters`, { headers });
             if (!chRes.ok) throw new Error('Failed to load chapters');
             const chaptersData = await chRes.json();
             
@@ -218,12 +218,12 @@ export default function ChapterView({
                 attempts: ch.attempts || 0
             }));
 
-            updateChaptersRecord(prev => ({ ...prev, [subjectId]: formattedChapters }));
+            updateChaptersRecord(prev => ({ ...prev, [subjectCode]: formattedChapters }));
         } catch (err: any) {
             console.error("Failed to fetch chapters:", err);
             setFetchError("Unable to fetch chapters at this moment. Please try again. 😊");
         } finally {
-            loadingSubjects.current.delete(subjectId);
+            loadingSubjects.current.delete(subjectCode);
             setIsLoading(false);
         }
     };

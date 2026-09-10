@@ -7,7 +7,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 
 interface SubjectProgress {
-    subject_id: number;
+    subject_code: number;
     name: string;
     icon_class: string;
     progress: number;
@@ -15,7 +15,7 @@ interface SubjectProgress {
 
 interface Chapter {
     id: number;
-    subject_id: number;
+    subject_code: number;
     title_translations: any;
     status: 'locked' | 'untested' | 'practicing' | 'proficient';
     accuracy: number;
@@ -82,12 +82,12 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
                 });
                 setSubjects(subjectsData);
                 if (subjectsData.length > 0) {
-                    setActiveSubjectId(subjectsData[0].subject_id);
+                    setActiveSubjectId(subjectsData[0].subject_code);
                 }
 
                 // 2. Fetch Chapters for all subjects
                 const chaptersPromises = subjectsData.map(async (subj) => {
-                    const chapterUrl = `${apiBase}/curriculum/subjects/${subj.subject_id}/chapters`;
+                    const chapterUrl = `${apiBase}/curriculum/subjects/${subj.subject_code}/chapters`;
                     const chapRes = await fetch(chapterUrl, { headers: { 'Authorization': `Bearer ${token}` } });
                     if (chapRes.ok) {
                         const rawChapData: any[] = await chapRes.json();
@@ -198,7 +198,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
     };
 
     const subjectDetails = subjects.map(subj => {
-        const allSubjChapters = allChapters.filter(c => c.subject_id === subj.subject_id);
+        const allSubjChapters = allChapters.filter(c => c.subject_code === subj.subject_code);
         const subjChapters = allSubjChapters.filter(c => c.attempts > 0);
         const totalChapters = allSubjChapters.length;
         const chaptersMastered = allSubjChapters.filter(c => c.status === 'proficient' || c.status === 'mastered').length;
@@ -300,7 +300,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
                                 Selected Subject
                             </span>
                             <span className="text-sm font-black truncate w-full mt-1 text-brand-primary">
-                                {subjectDetails.find(s => s.subject_id === activeSubjectId)?.name || 'Subject'}
+                                {subjectDetails.find(s => s.subject_code === activeSubjectId)?.name || 'Subject'}
                             </span>
                         </div>
                         <div className={`w-8 h-8 rounded-full bg-bg-surface-elevated flex items-center justify-center transition-transform duration-300 ${isSubjectDropdownOpen ? 'rotate-180 bg-brand-primary/20' : ''}`}>
@@ -320,21 +320,21 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
                                 <div className="max-h-80 overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent py-2">
                                     {subjectDetails.map((subj) => (
                                         <button
-                                            key={subj.subject_id}
+                                            key={subj.subject_code}
                                             onClick={() => {
-                                                setActiveSubjectId(subj.subject_id);
+                                                setActiveSubjectId(subj.subject_code);
                                                 setIsSubjectDropdownOpen(false);
                                             }}
-                                            className={`w-full text-left px-5 py-3 transition-colors group flex items-center gap-3 ${activeSubjectId === subj.subject_id
+                                            className={`w-full text-left px-5 py-3 transition-colors group flex items-center gap-3 ${activeSubjectId === subj.subject_code
                                                     ? 'bg-brand-primary/10 border-l-4 border-brand-primary'
                                                     : 'hover:bg-gray-800/50 border-l-4 border-transparent'
                                                 }`}
                                         >
                                             <div className="w-8 h-8 rounded-lg bg-bg-surface-elevated flex items-center justify-center border border-border-subtle shrink-0">
-                                                {subj.icon_class ? <i className={`${subj.icon_class} text-sm ${activeSubjectId === subj.subject_id ? 'text-brand-primary' : 'text-text-secondary'}`}></i> : <Zap className={`w-4 h-4 ${activeSubjectId === subj.subject_id ? 'text-brand-primary' : 'text-text-secondary'}`} />}
+                                                {subj.icon_class ? <i className={`${subj.icon_class} text-sm ${activeSubjectId === subj.subject_code ? 'text-brand-primary' : 'text-text-secondary'}`}></i> : <Zap className={`w-4 h-4 ${activeSubjectId === subj.subject_code ? 'text-brand-primary' : 'text-text-secondary'}`} />}
                                             </div>
                                             <div>
-                                                <span className={`font-bold text-sm block leading-snug group-hover:text-white transition-colors ${activeSubjectId === subj.subject_id ? 'text-brand-primary' : 'text-gray-300'}`}>{subj.name}</span>
+                                                <span className={`font-bold text-sm block leading-snug group-hover:text-white transition-colors ${activeSubjectId === subj.subject_code ? 'text-brand-primary' : 'text-gray-300'}`}>{subj.name}</span>
                                             </div>
                                         </button>
                                     ))}
@@ -349,7 +349,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
             <div className="space-y-4">
                 {subjectDetails.map((subj) => {
                     const pct = Number(subj.completionPct) || 0;
-                    const isActive = activeSubjectId === subj.subject_id;
+                    const isActive = activeSubjectId === subj.subject_code;
                     const chaptersMastered = subj.chaptersMastered;
                     const totalChapters = subj.totalChapters;
                     const completionPct = subj.completionPct;
@@ -358,7 +358,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
                     return (
                         <Card 
                             variant="default"
-                            key={subj.subject_id} 
+                            key={subj.subject_code} 
                             className={`${isActive ? 'block' : 'hidden'} group transition-all duration-300 p-0 overflow-hidden`}
                         >
                             {/* Prominent Subject Header */}

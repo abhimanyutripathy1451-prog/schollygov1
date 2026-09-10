@@ -4,7 +4,7 @@ import { BarChart3, Target, CheckCircle2, Award, Zap, ArrowLeft, Loader2, AlertT
 import { useAuthStore } from '../../stores/auth';
 
 interface SubjectProgress {
-    subject_id: number;
+    subject_code: number;
     name: string;
     icon_class: string;
     progress: number;
@@ -12,7 +12,7 @@ interface SubjectProgress {
 
 interface Chapter {
     id: number;
-    subject_id: number;
+    subject_code: number;
     title: string;
     status: 'locked' | 'untested' | 'practicing' | 'proficient';
     accuracy: number;
@@ -61,7 +61,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
 
                 // 2. Fetch Chapters for all subjects
                 const chaptersPromises = subjectsData.map(async (subj) => {
-                    const chapterUrl = `${apiBase}/curriculum/subjects/${subj.subject_id}/chapters`;
+                    const chapterUrl = `${apiBase}/curriculum/subjects/${subj.subject_code}/chapters`;
                     const chapRes = await fetch(chapterUrl, { headers: { 'Authorization': `Bearer ${token}` } });
                     if (chapRes.ok) {
                         const chapData: Chapter[] = await chapRes.json();
@@ -155,7 +155,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
     };
 
     const subjectDetails = subjects.map(subj => {
-        const subjChapters = allChapters.filter(c => c.subject_id === subj.subject_id && c.attempts > 0);
+        const subjChapters = allChapters.filter(c => c.subject_code === subj.subject_code && c.attempts > 0);
         const timeSpent = subjChapters.reduce((sum, c) => sum + Number(c.total_time_seconds || 0), 0);
         const easyAcc = subjChapters.length > 0 ? subjChapters.reduce((sum, c) => sum + (Number(c.easy_accuracy) || 0), 0) / subjChapters.length : 0;
         const medAcc = subjChapters.length > 0 ? subjChapters.reduce((sum, c) => sum + (Number(c.medium_accuracy) || 0), 0) / subjChapters.length : 0;
@@ -255,13 +255,13 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
                 </h3>
                 {subjectDetails.map((subj) => {
                     const pct = Number(subj.progress) || 0;
-                    const isExpanded = expandedSubject === subj.subject_id;
+                    const isExpanded = expandedSubject === subj.subject_code;
                     
                     return (
-                        <div key={subj.subject_id} className="bg-graphite border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+                        <div key={subj.subject_code} className="bg-graphite border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
                             {/* Subject Header */}
                             <button 
-                                onClick={() => setExpandedSubject(isExpanded ? null : subj.subject_id)}
+                                onClick={() => setExpandedSubject(isExpanded ? null : subj.subject_code)}
                                 className="w-full p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors"
                             >
                                 <div className="flex items-center gap-4">

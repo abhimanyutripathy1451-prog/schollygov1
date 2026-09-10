@@ -75,7 +75,7 @@ export default function Dashboard({ apiBase = import.meta.env.VITE_API_URL || ''
 
             const data: any[] = await res.json();
             setSubjects(data.map((s) => ({
-                id: s.subject_id || s.id,
+                id: s.subject_code || s.id,
                 name: s.name,
                 hindiName: s.name_hi,
                 icon: s.icon_class,
