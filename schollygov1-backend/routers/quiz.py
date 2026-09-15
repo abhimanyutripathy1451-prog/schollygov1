@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, Union
 from datetime import date, timedelta
 import aiomysql
 
@@ -96,7 +96,7 @@ class QuestionResult(BaseModel):
 
 class QuizAttemptSubmit(BaseModel):
     idempotency_key: str = Field(..., description="Unique UUID for this attempt to prevent double submission")
-    topic_code: str
+    topic_code: Union[str, int, None] = None
     chapter_code: str
     is_topic_quiz: bool = False
     difficulty_chosen: Literal['easy', 'medium', 'hard', 'adaptive']
@@ -231,7 +231,7 @@ async def fetch_questions_from_db(cursor, user_id, topic_code, diff_level, limit
 @router.get("/topics/{topic_code}/questions")
 async def get_quiz_questions(
     topic_code: str,
-    difficulty: Literal['easy', 'medium', 'hard', 'adaptive'] = Query("medium"),
+    difficulty: Literal['easy', 'medium', 'hard', 'adaptive'] = Query("easy"),
     user_id: str = Depends(get_current_user),
     conn: aiomysql.Connection = Depends(get_db)
 ):
