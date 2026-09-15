@@ -205,7 +205,6 @@ CREATE TABLE `user_chapter_progress` (
 
 CREATE TABLE `quiz_questions` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `code` varchar(100) NOT NULL,
   `chapter_code` varchar(100) NOT NULL,
   `topic_code` varchar(100) NOT NULL,
   `base_xp` int NOT NULL DEFAULT '10',
@@ -233,7 +232,6 @@ CREATE TABLE `quiz_questions` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `code` (`code`),
   KEY `chapter_code` (`chapter_code`),
   KEY `quiz_questions_ibfk_2` (`topic_code`),
   CONSTRAINT `quiz_questions_ibfk_1` FOREIGN KEY (`chapter_code`) REFERENCES `chapters` (`code`) ON DELETE CASCADE,

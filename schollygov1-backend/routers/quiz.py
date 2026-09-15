@@ -523,7 +523,7 @@ async def update_topic_progress_python(cursor, user_id: str, topic_code: str, is
     """, (user_id, topic_code, 1, new_mastery, easy_acc, med_acc, hard_acc, status, rolling_attempts_count, previous_mastery, unresolved_count))
 
     # --- Trigger 4: Arena Unlock ---
-    await cursor.execute("SELECT chapter_code FROM topics WHERE id = %s", (topic_code,))
+    await cursor.execute("SELECT chapter_code FROM topics WHERE code = %s", (topic_code,))
     topic_res = await cursor.fetchone()
     if topic_res:
         chapter_code = topic_res['chapter_code']
@@ -634,7 +634,7 @@ async def update_subject_progress_python(cursor, user_id: str, subject_code: str
             SUM(ucp.mastery_percentage) as total_mastery,
             SUM(CASE WHEN ucp.mastery_percentage >= 75.00 AND ucp.status = 'active' THEN 1 ELSE 0 END) as chapters_completed
         FROM chapters c
-        JOIN user_chapter_progress ucp ON c.id = ucp.chapter_code
+        JOIN user_chapter_progress ucp ON c.code = ucp.chapter_code
         WHERE c.subject_code = %s AND c.is_active = TRUE AND ucp.user_id = %s AND ucp.status = 'active'
     """, (subject_code, user_id))
     stats = await cursor.fetchone()
@@ -819,7 +819,7 @@ async def submit_quiz_attempt(
                 for r in attempt.question_results:
                     tested_topics.add(get_tid(r.question_id))
 
-            await cursor.execute("SELECT subject_code FROM chapters WHERE id = %s", (attempt.chapter_code,))
+            await cursor.execute("SELECT subject_code FROM chapters WHERE code = %s", (attempt.chapter_code,))
             subj_res = await cursor.fetchone()
             subject_code = subj_res['subject_code'] if subj_res else None
 
@@ -1010,9 +1010,9 @@ async def get_chapter_adaptive_quiz(
 ):
     """Generates a 10-question adaptive quiz using topic-level mastery allocations."""
     async with conn.cursor(aiomysql.DictCursor) as cursor:
-        await cursor.execute("SELECT id FROM topics WHERE chapter_code = %s", (chapter_code,))
+        await cursor.execute("SELECT code FROM topics WHERE chapter_code = %s", (chapter_code,))
         topics = await cursor.fetchall()
-        topic_codes = [t['id'] for t in topics]
+        topic_codes = [t['code'] for t in topics]
         
         if not topic_codes:
             return []

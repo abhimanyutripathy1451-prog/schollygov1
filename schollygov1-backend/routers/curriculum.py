@@ -150,19 +150,20 @@ async def get_chapter_topics(
 ):
     """Fetches all topics for a specific chapter ID along with user progress."""
     async with conn.cursor(aiomysql.DictCursor) as cursor:
-        await cursor.execute("SELECT id FROM chapters WHERE id = %s", (chapter_code,))
+        await cursor.execute("SELECT code FROM chapters WHERE code = %s", (chapter_code,))
         if not await cursor.fetchone():
             raise HTTPException(status_code=404, detail="Chapter not found")
 
         query = """
             SELECT 
                 t.*,
+                t.code as id,
                 COALESCE(utp.mastery_percentage, 0) as accuracy,
                 COALESCE(utp.lifetime_attempts, 0) as attempts,
                 COALESCE(utp.status, 'untested') as mastery_state
             FROM topics t
             LEFT JOIN user_topic_progress utp 
-                ON t.id = utp.topic_code 
+                ON t.code = utp.topic_code 
                 AND utp.user_id = %s 
             WHERE t.chapter_code = %s AND t.is_active = TRUE
             ORDER BY t.sequence_order
