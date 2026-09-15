@@ -209,15 +209,12 @@ async def fetch_questions_from_db(cursor, user_id, topic_code, diff_level, limit
             q.option_2, q.option_2_image_url, q.option_3, q.option_3_image_url, 
             q.correct_answers, q.question_type,
             q.explanation, q.tags, q.expected_time_seconds,
-            q.question_translations, q.options_translations, q.explanation_translations,
-            COALESCE(uqh.times_seen, 0) as seen_count,
-            uqh.is_correct,
-            uqh.last_seen_at
+            q.question_translations, q.options_translations, q.explanation_translations
         FROM quiz_questions q
         LEFT JOIN user_question_history uqh ON q.id = uqh.question_id AND uqh.user_id = %s
         WHERE q.topic_code = %s AND q.difficulty = %s AND q.is_active = TRUE {placeholders}
         ORDER BY 
-            seen_count ASC,
+            COALESCE(uqh.times_seen, 0) ASC,
             uqh.is_correct ASC,
             uqh.last_seen_at ASC,
             RAND()
@@ -267,15 +264,12 @@ async def get_quiz_questions(
                         q.option_2, q.option_2_image_url, q.option_3, q.option_3_image_url, 
                         q.correct_answers, q.question_type,
                         q.explanation, q.tags, q.expected_time_seconds,
-                        q.question_translations, q.options_translations, q.explanation_translations,
-                        COALESCE(uqh.times_seen, 0) as seen_count,
-                        uqh.is_correct,
-                        uqh.last_seen_at
+                        q.question_translations, q.options_translations, q.explanation_translations
                     FROM quiz_questions q
                     LEFT JOIN user_question_history uqh ON q.id = uqh.question_id AND uqh.user_id = %s
                     WHERE q.topic_code = %s AND q.difficulty = %s AND q.is_active = TRUE
                     ORDER BY 
-                        seen_count ASC,
+                        COALESCE(uqh.times_seen, 0) ASC,
                         uqh.is_correct ASC,
                         uqh.last_seen_at ASC,
                         RAND()
@@ -357,15 +351,12 @@ async def get_quiz_questions(
                     q.option_2, q.option_2_image_url, q.option_3, q.option_3_image_url, 
                     q.correct_answers, q.question_type,
                     q.explanation, q.tags, q.expected_time_seconds,
-                    q.question_translations, q.options_translations, q.explanation_translations,
-                    COALESCE(uqh.times_seen, 0) as seen_count,
-                    uqh.is_correct,
-                    uqh.last_seen_at
+                    q.question_translations, q.options_translations, q.explanation_translations
                 FROM quiz_questions q
                 LEFT JOIN user_question_history uqh ON q.id = uqh.question_id AND uqh.user_id = %s
                 WHERE q.topic_code = %s AND q.difficulty = %s AND q.is_active = TRUE
                 ORDER BY 
-                    seen_count ASC,
+                    COALESCE(uqh.times_seen, 0) ASC,
                     uqh.is_correct ASC,
                     uqh.last_seen_at ASC,
                     RAND()
@@ -390,13 +381,10 @@ async def get_mistakes_questions(
                 q.option_2, q.option_2_image_url, q.option_3, q.option_3_image_url, 
                 q.correct_answers, q.question_type,
                 q.explanation, q.tags, q.expected_time_seconds,
-                q.question_translations, q.options_translations, q.explanation_translations,
-                uqh.times_seen,
-                uqh.is_correct,
-                uqh.last_seen_at
+                q.question_translations, q.options_translations, q.explanation_translations
             FROM quiz_questions q
             JOIN user_question_history uqh ON q.id = uqh.question_id
-            JOIN topics t ON q.topic_code = t.id
+            JOIN topics t ON q.topic_code = t.code
             WHERE uqh.user_id = %s AND t.chapter_code = %s AND uqh.is_correct = FALSE AND q.is_active = TRUE
             ORDER BY uqh.last_seen_at ASC, RAND()
             LIMIT 10
