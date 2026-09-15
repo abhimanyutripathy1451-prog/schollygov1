@@ -193,13 +193,17 @@ export default function ChapterView({
 
     const loadChapters = async (subjectCode: string | number) => {
         if (!subjectCode || subjectCode === 'undefined') return;
-        if (chaptersRecord[subjectCode] || loadingSubjects.current.has(subjectCode)) {
-            setIsLoading(false);
+        
+        if (loadingSubjects.current.has(subjectCode)) {
             return;
         }
 
+        const hasCache = !!chaptersRecord[subjectCode];
+        
+        if (!hasCache) {
+            setIsLoading(true);
+        }
         loadingSubjects.current.add(subjectCode);
-        setIsLoading(true);
 
         try {
             const headers = getAuthHeaders();

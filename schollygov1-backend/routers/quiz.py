@@ -164,13 +164,25 @@ async def debug_all(conn: aiomysql.Connection = Depends(get_db)):
 def format_questions(rows):
     formatted = []
     import json
+    import random
+    
     for q in rows:
-        options = []
+        options_with_idx = []
         for i in range(4):
             text = q.get(f"option_{i}")
             img = q.get(f"option_{i}_image_url")
             if text is not None or img is not None:
-                options.append({"text": text, "image_url": img})
+                options_with_idx.append({"orig_idx": str(i), "data": {"text": text, "image_url": img}})
+                
+        # Shuffle the options dynamically for every occurrence
+        random.shuffle(options_with_idx)
+        
+        # Extract the shuffled options and create a mapping from original index to new index
+        options = []
+        new_index_map = {}
+        for new_idx, opt in enumerate(options_with_idx):
+            options.append(opt["data"])
+            new_index_map[opt["orig_idx"]] = str(new_idx)
         
         ans_raw = q.get("correct_answers")
         ans = []
@@ -184,10 +196,21 @@ def format_questions(rows):
         elif q.get("ans") is not None:
             ans = [q.get("ans")]
             
+        # Translate the correct answers to their new shuffled indices
+        translated_ans = []
+        for a in ans:
+            a_str = str(a)
+            if a_str in new_index_map:
+                new_idx_str = new_index_map[a_str]
+                # Preserve the original data type (int or str)
+                translated_ans.append(int(new_idx_str) if isinstance(a, int) else new_idx_str)
+            else:
+                translated_ans.append(a)
+                
         formatted.append({
             **q,
             "options": options,
-            "ans": ans
+            "ans": translated_ans
         })
     return formatted
 

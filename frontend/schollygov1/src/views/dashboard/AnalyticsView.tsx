@@ -167,7 +167,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
     const currentXp = user?.total_xp ?? user?.xp ?? user?.score ?? 0;
     const attemptedChapters = allChapters.filter(c => c.attempts > 0);
     const totalAttempts = attemptedChapters.reduce((sum, c) => sum + Number(c.attempts), 0);
-    const proficientTopics = allChapters.filter(c => c.status === 'proficient' || c.status === 'mastered').length;
+    const proficientTopics = allChapters.filter(c => c.status === 'active' && Number(c.accuracy) >= 75).length;
     const totalTimeSeconds = attemptedChapters.reduce((sum, c) => sum + Number(c.total_time_seconds || 0), 0);
     
     // Accuracies (only among attempted concepts)
@@ -201,7 +201,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
         const allSubjChapters = allChapters.filter(c => c.subject_code === subj.subject_code);
         const subjChapters = allSubjChapters.filter(c => c.attempts > 0);
         const totalChapters = allSubjChapters.length;
-        const chaptersMastered = allSubjChapters.filter(c => c.status === 'proficient' || c.status === 'mastered').length;
+        const chaptersMastered = allSubjChapters.filter(c => c.status === 'active' && Number(c.accuracy) >= 75).length;
         const subjPlays = allSubjChapters.reduce((sum, c) => sum + (c.topics || []).reduce((tSum: number, t: any) => tSum + (Number(t.attempts) || 0), 0), 0);
         const completionPct = totalChapters > 0 ? (chaptersMastered / totalChapters) * 100 : 0;
         const timeSpent = subjChapters.reduce((sum, c) => sum + Number(c.total_time_seconds || 0), 0);
@@ -224,7 +224,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
     });
 
     return (
-        <div className="flex flex-col w-full min-h-full font-sans text-white relative z-10 bg-bg-app">
+        <div className="flex flex-col w-full min-h-full font-sans text-white relative z-10 bg-bg-app pb-24 md:pb-8">
             {/* Mobile Header */}
             <header className="md:hidden flex items-center justify-between p-4 sticky top-0 bg-deep-space/90 backdrop-blur-md z-30 border-b border-white/5">
                 <div className="flex items-center gap-3">
@@ -421,16 +421,18 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
                                                         <div className="mb-1.5">
                                                             <h4 className="text-lg font-black text-white group-hover:text-brand-primary transition-colors">{ch.title}</h4>
                                                         </div>
-                                                        <div className="text-[10px] sm:text-xs text-text-secondary font-bold tracking-widest uppercase flex flex-wrap items-center gap-2">
-                                                            <TrendingUp className="w-3.5 h-3.5" /> {ch.attempts} plays
-                                                            <span className="text-slate-600 border-l border-border-subtle pl-2 ml-1">
-                                                                <Clock className="w-3.5 h-3.5 inline mr-1" /> {formatTime(Number(ch.total_time_seconds) || 0)}
-                                                            </span>
-                                                        </div>
                                                     </div>
                                                 </div>
                                                 
-                                                <div className="flex items-center gap-3 md:gap-4 ml-7 md:ml-0 self-start md:self-auto mt-2 md:mt-0">
+                                                <div className="flex items-center gap-3 md:gap-4 ml-7 md:ml-0 self-start md:self-auto mt-2 md:mt-0 flex-wrap">
+                                                    <div className="flex flex-col items-center justify-center px-4 py-2 rounded-xl border border-white/10 bg-white/5 shadow-[0_0_15px_rgba(255,255,255,0.03)] min-w-[80px]">
+                                                        <span className="text-[9px] text-text-secondary font-black uppercase tracking-widest mb-1 text-center">Plays</span>
+                                                        <span className="text-lg font-black text-white leading-none">{ch.attempts}</span>
+                                                    </div>
+                                                    <div className="flex flex-col items-center justify-center px-4 py-2 rounded-xl border border-white/10 bg-white/5 shadow-[0_0_15px_rgba(255,255,255,0.03)] min-w-[80px]">
+                                                        <span className="text-[9px] text-text-secondary font-black uppercase tracking-widest mb-1 text-center">Time</span>
+                                                        <span className="text-lg font-black text-white leading-none">{formatTime(Number(ch.total_time_seconds) || 0)}</span>
+                                                    </div>
                                                     <div className="flex flex-col items-center justify-center px-4 py-2 rounded-xl border border-brand-primary/30 bg-brand-primary/10 shadow-[0_0_15px_rgba(250,204,21,0.1)] min-w-[80px]">
                                                         <span className="text-[9px] text-brand-primary font-black uppercase tracking-widest mb-1 text-center">Warm-up</span>
                                                         <span className="text-lg font-black text-white leading-none">{Math.round(avgTopicMastery)}%</span>
@@ -455,7 +457,7 @@ export default function AnalyticsView({ apiBase = import.meta.env.VITE_API_URL |
                         </Card>
                     );
                 })}
-            </div>
+        </div>
         </div>
         </div>
     );
