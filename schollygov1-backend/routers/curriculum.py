@@ -114,8 +114,15 @@ async def get_chapters(
         placeholders = ','.join(['%s'] * len(chapter_codes))
         topic_query = f"""
             SELECT 
-                t.*,
                 t.code as id,
+                t.code,
+                t.chapter_code,
+                t.title,
+                t.description,
+                t.sequence_order,
+                t.is_active,
+                t.created_at,
+                t.updated_at,
                 COALESCE(utp.mastery_percentage, 0) as accuracy,
                 COALESCE(utp.lifetime_attempts, 0) as attempts,
                 COALESCE(utp.status, 'untested') as mastery_state
@@ -156,8 +163,15 @@ async def get_chapter_topics(
 
         query = """
             SELECT 
-                t.*,
                 t.code as id,
+                t.code,
+                t.chapter_code,
+                t.title,
+                t.description,
+                t.sequence_order,
+                t.is_active,
+                t.created_at,
+                t.updated_at,
                 COALESCE(utp.mastery_percentage, 0) as accuracy,
                 COALESCE(utp.lifetime_attempts, 0) as attempts,
                 COALESCE(utp.status, 'untested') as mastery_state
